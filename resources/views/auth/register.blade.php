@@ -4,7 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Sign Up - InnoveraOne</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         @keyframes fadeInUp {
             from {
@@ -34,9 +35,13 @@
         .delay-4 { animation-delay: 0.4s; }
         .delay-5 { animation-delay: 0.5s; }
         .delay-6 { animation-delay: 0.6s; }
+        .delay-6 { animation-delay: 0.6s; }
         .glow-effect {
             animation: glow 3s ease-in-out infinite;
         }
+        .animate-blob { animation: blob 8s ease-in-out infinite; }
+        .delay-2000 { animation-delay: 2s; }
+        .delay-4000 { animation-delay: 4s; }
         input:-webkit-autofill,
         input:-webkit-autofill:hover,
         input:-webkit-autofill:focus {
@@ -47,6 +52,12 @@
             background: rgba(15, 23, 42, 0.7);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(168, 85, 247, 0.2);
+        }
+        @keyframes blob {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -20px) scale(1.05); }
+            66% { transform: translate(-20px, 20px) scale(0.98); }
+            100% { transform: translate(0px, 0px) scale(1); }
         }
     </style>
 </head>
@@ -274,3 +285,4 @@
     </script>
 </body>
 </html>
+
