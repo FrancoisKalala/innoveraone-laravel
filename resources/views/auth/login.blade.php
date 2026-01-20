@@ -19,10 +19,10 @@
         }
         @keyframes glow {
             0%, 100% {
-                box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+                box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
             }
             50% {
-                box-shadow: 0 0 40px rgba(236, 72, 153, 0.4);
+                box-shadow: 0 0 40px rgba(37, 99, 235, 0.4);
             }
         }
         @keyframes blob {
@@ -55,15 +55,15 @@
         .glass {
             background: rgba(15, 23, 42, 0.7);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(168, 85, 247, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.2);
         }
     </style>
 </head>
 <body class="antialiased bg-slate-950">
     <!-- Animated Background Blobs -->
-    <div class="fixed inset-0 -z-20 overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div class="absolute top-0 left-1/4 w-96 h-96 bg-purple-600/20 rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
-        <div class="absolute top-0 right-1/4 w-96 h-96 bg-pink-600/20 rounded-full mix-blend-multiply filter blur-3xl animate-blob delay-2000"></div>
+    <div class="fixed inset-0 -z-20 overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+        <div class="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
+        <div class="absolute top-0 right-1/4 w-96 h-96 bg-blue-600/20 rounded-full mix-blend-multiply filter blur-3xl animate-blob delay-2000"></div>
         <div class="absolute -bottom-8 left-1/2 w-96 h-96 bg-blue-600/20 rounded-full mix-blend-multiply filter blur-3xl animate-blob delay-4000"></div>
     </div>
 
@@ -73,15 +73,15 @@
             <div class="text-center mb-12 animate-in delay-1">
                 <div class="flex justify-center mb-6">
                     <div class="relative">
-                        <div class="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl blur-2xl opacity-75 glow-effect"></div>
-                        <div class="relative w-24 h-24 bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl flex items-center justify-center shadow-2xl">
+                        <div class="absolute inset-0 bg-gradient-to-r from-blue-700 to-black rounded-3xl blur-2xl opacity-75 glow-effect"></div>
+                        <div class="relative w-24 h-24 bg-gradient-to-br from-blue-600 to-black rounded-3xl flex items-center justify-center shadow-2xl">
                             <svg class="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm0-13c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5z"/>
                             </svg>
                         </div>
                     </div>
                 </div>
-                <h1 class="text-6xl font-black bg-gradient-to-r from-purple-300 via-pink-300 to-purple-300 bg-clip-text text-transparent mb-3">InnoveraOne</h1>
+                <h1 class="text-6xl font-black bg-gradient-to-r from-blue-400 via-blue-500 to-black bg-clip-text text-transparent mb-3">InnoveraOne</h1>
                 <p class="text-gray-300 text-lg font-medium">Connect • Share • Innovate</p>
             </div>
 
@@ -89,7 +89,7 @@
             <div class="glass rounded-3xl p-8 space-y-6 shadow-2xl animate-in delay-2">
                 <!-- Error Messages -->
                 @if ($errors->any())
-                    <div class="p-4 bg-gradient-to-r from-red-500/10 to-pink-500/10 border border-red-500/30 rounded-2xl backdrop-blur-sm">
+                    <div class="p-4 bg-gradient-to-r from-red-500/10 to-red-500/10 border border-red-500/30 rounded-2xl backdrop-blur-sm">
                         <div class="flex items-start gap-3">
                             <span class="text-2xl flex-shrink-0">⚠️</span>
                             <div>
@@ -119,10 +119,10 @@
                                 value="{{ old('email') }}"
                                 required
                                 autofocus
-                                class="w-full px-6 py-3.5 rounded-xl bg-slate-700/50 text-white placeholder-gray-400 border-2 border-purple-500/30 focus:border-purple-400 focus:outline-none focus:ring-4 focus:ring-purple-500/20 transition-all duration-300 backdrop-blur hover:bg-slate-700/70"
+                                class="w-full px-6 py-3.5 rounded-xl bg-slate-700/50 text-white placeholder-gray-400 border-2 border-blue-500/30 focus:border-blue-400 focus:outline-none focus:ring-4 focus:ring-blue-500/20 transition-all duration-300 backdrop-blur hover:bg-slate-700/70"
                                 placeholder="you@innovera.com"
                             >
-                            <div class="absolute right-4 top-1/2 transform -translate-y-1/2 text-purple-400 opacity-0 group-focus-within:opacity-100 transition-opacity">✓</div>
+                            <div class="absolute right-4 top-1/2 transform -translate-y-1/2 text-blue-400 opacity-0 group-focus-within:opacity-100 transition-opacity">✓</div>
                         </div>
                     </div>
 
@@ -139,10 +139,10 @@
                                 id="password"
                                 name="password"
                                 required
-                                class="w-full px-6 py-3.5 rounded-xl bg-slate-700/50 text-white placeholder-gray-400 border-2 border-purple-500/30 focus:border-purple-400 focus:outline-none focus:ring-4 focus:ring-purple-500/20 transition-all duration-300 backdrop-blur hover:bg-slate-700/70"
+                                class="w-full px-6 py-3.5 rounded-xl bg-slate-700/50 text-white placeholder-gray-400 border-2 border-blue-500/30 focus:border-blue-400 focus:outline-none focus:ring-4 focus:ring-blue-500/20 transition-all duration-300 backdrop-blur hover:bg-slate-700/70"
                                 placeholder="Enter your password"
                             >
-                            <button type="button" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-purple-400 hover:text-purple-300 transition" onclick="togglePassword(this)">
+                            <button type="button" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-blue-400 hover:text-blue-300 transition" onclick="togglePassword(this)">
                                 👁️
                             </button>
                         </div>
@@ -154,12 +154,12 @@
                             <input
                                 type="checkbox"
                                 name="remember"
-                                class="w-5 h-5 rounded-lg border-purple-500/30 bg-slate-700/50 text-purple-500 focus:ring-purple-500 cursor-pointer accent-purple-500 transition"
+                                class="w-5 h-5 rounded-lg border-blue-500/30 bg-slate-700/50 text-blue-500 focus:ring-blue-500 cursor-pointer accent-blue-500 transition"
                             >
                             <span class="text-sm text-gray-300 group-hover:text-gray-200 transition">Keep me logged in</span>
                         </label>
                         @if (Route::has('password.request'))
-                            <a href="{{ route('password.request') }}" class="text-sm text-purple-400 hover:text-pink-400 transition font-medium">
+                            <a href="{{ route('password.request') }}" class="text-sm text-blue-400 hover:text-blue-300 transition font-medium">
                                 Forgot password?
                             </a>
                         @endif
@@ -168,7 +168,7 @@
                     <!-- Login Button -->
                     <button
                         type="submit"
-                        class="w-full py-3.5 px-4 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 text-white font-bold text-lg rounded-xl hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 transform hover:scale-105 active:scale-95 animate-in delay-4"
+                        class="w-full py-3.5 px-4 bg-gradient-to-r from-blue-600 via-blue-700 to-black text-white font-bold text-lg rounded-xl hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 transform hover:scale-105 active:scale-95 animate-in delay-4"
                     >
                         🚀 Login Now
                     </button>
@@ -177,7 +177,7 @@
                 <!-- Divider -->
                 <div class="relative py-3">
                     <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-purple-500/20"></div>
+                        <div class="w-full border-t border-blue-500/20"></div>
                     </div>
                     <div class="relative flex justify-center">
                         <span class="px-3 bg-slate-950 text-xs text-gray-400 font-bold uppercase tracking-wider">Or</span>
@@ -187,7 +187,7 @@
                 <!-- Sign Up Button -->
                 <a
                     href="{{ route('register') }}"
-                    class="w-full block py-3.5 px-4 bg-gradient-to-r from-slate-700/80 to-slate-800/80 text-white font-bold rounded-xl border border-purple-500/30 hover:border-purple-500/60 hover:from-slate-700 hover:to-slate-700 transition-all duration-300 text-center backdrop-blur-sm hover:shadow-lg animate-in delay-4"
+                    class="w-full block py-3.5 px-4 bg-gradient-to-r from-slate-700/80 to-slate-800/80 text-white font-bold rounded-xl border border-blue-500/30 hover:border-blue-500/60 hover:from-slate-700 hover:to-slate-700 transition-all duration-300 text-center backdrop-blur-sm hover:shadow-lg animate-in delay-4"
                 >
                     ✨ Create New Account
                 </a>
@@ -195,7 +195,7 @@
                 <!-- Guest Access -->
                 <a
                     href="{{ route('guest.feed') }}"
-                    class="w-full block py-2.5 px-4 text-center text-purple-300 hover:text-pink-300 text-sm font-bold transition duration-300 rounded-lg hover:bg-purple-500/10 animate-in delay-5"
+                    class="w-full block py-2.5 px-4 text-center text-blue-300 hover:text-blue-200 text-sm font-bold transition duration-300 rounded-lg hover:bg-blue-500/10 animate-in delay-5"
                 >
                     👀 Continue as Guest
                 </a>

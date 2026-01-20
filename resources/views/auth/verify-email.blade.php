@@ -9,13 +9,13 @@
     @keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
     .animate-in{animation:fadeInUp .6s ease-out forwards;opacity:0}
     .delay-1{animation-delay:.1s}.delay-2{animation-delay:.2s}
-    .glass{background:rgba(15,23,42,.7);backdrop-filter:blur(10px);border:1px solid rgba(168,85,247,.2)}
+    .glass{background:rgba(15,23,42,.7);backdrop-filter:blur(10px);border:1px solid rgba(59,130,246,.2)}
   </style>
 </head>
 <body class="antialiased bg-slate-950 min-h-screen flex items-center justify-center p-6">
   <div class="w-full max-w-md">
     <div class="text-center mb-10 animate-in">
-      <h1 class="text-4xl font-black bg-gradient-to-r from-purple-300 via-pink-300 to-purple-300 bg-clip-text text-transparent">InnoveraOne</h1>
+      <h1 class="text-4xl font-black bg-gradient-to-r from-blue-400 via-blue-500 to-black bg-clip-text text-transparent">InnoveraOne</h1>
       <p class="text-gray-400 mt-2">Verify your email address</p>
     </div>
 
@@ -32,12 +32,12 @@
 
       <form method="POST" action="{{ route('verification.send') }}" class="mt-6">
         @csrf
-        <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 text-white font-bold rounded-xl hover:shadow-2xl hover:shadow-purple-500/50 transition">Resend Verification Email</button>
+        <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-blue-600 via-blue-700 to-black text-white font-bold rounded-xl hover:shadow-2xl hover:shadow-blue-500/50 transition">Resend Verification Email</button>
       </form>
 
       <form method="POST" action="{{ route('logout') }}" class="mt-4">
         @csrf
-        <button type="submit" class="w-full py-3.5 bg-slate-800 text-white font-bold rounded-xl border border-purple-500/30 hover:border-purple-500/60 transition">Log Out</button>
+        <button type="submit" class="w-full py-3.5 bg-slate-800 text-white font-bold rounded-xl border border-blue-500/30 hover:border-blue-500/60 transition">Log Out</button>
       </form>
     </div>
   </div>
