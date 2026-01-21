@@ -15,10 +15,20 @@ return new class extends Migration
             $table->id();
             $table->string('name', 191);
             $table->string('email', 191)->unique();
+            $table->string('username', 191)->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password', 191);
+            $table->text('bio')->nullable();
+            $table->string('profile_photo_path', 191)->nullable();
+            $table->string('cover_photo_path', 191)->nullable();
+            $table->integer('followers_count')->default(0);
+            $table->integer('following_count')->default(0);
+            $table->integer('posts_count')->default(0);
+            $table->boolean('is_active')->default(true);
             $table->rememberToken();
             $table->timestamps();
+            $table->index('username');
+            $table->index('is_active');
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

@@ -46,7 +46,7 @@
                         <!-- User Info -->
                         <div class="text-center mb-4">
                             <h3 class="text-lg font-bold text-white group-hover:text-blue-600 transition">{{ $user->name }}</h3>
-                            <p class="text-blue-600">@{{ $user->username }}</p>
+                            <p class="text-blue-600">{{ '@' . ($user->username ?? strtolower(str_replace(' ', '', $user->name))) }}</p>
                             <p class="text-sm text-gray-400 mt-2">{{ $user->bio ?? 'No bio' }}</p>
                         </div>
 
@@ -99,7 +99,7 @@
         @if($albums->count() > 0)
             <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                 @foreach($albums as $album)
-                    <a href="{{ route('albums', ['album' => $album->id]) }}" class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border border-blue-700/20 p-4 hover:border-blue-700/50 transition group">
+                    <a href="{{ route('dashboard', ['album' => $album->id]) }}" class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border border-blue-700/20 p-4 hover:border-blue-700/50 transition group">
                         <div class="aspect-square rounded-lg bg-gradient-to-r from-blue-700 to-black mb-4 flex items-center justify-center overflow-hidden relative">
                             <div class="absolute inset-0 opacity-20" style="background: url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E'); background-repeat: repeat;"></div>
                             <span class="text-3xl">🖼️</span>

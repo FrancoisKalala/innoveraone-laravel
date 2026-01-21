@@ -4,7 +4,7 @@
         <div class="flex-1">
             <div class="flex items-center gap-2 mb-2">
                 <h4 class="font-bold text-white text-sm">{{ $comment->user->name }}</h4>
-                <span class="text-xs text-gray-500">@{{ $comment->user->username }}</span>
+                <span class="text-xs text-gray-500">{{ '@' . ($comment->user->username ?? strtolower(str_replace(' ', '', $comment->user->name))) }}</span>
                 <span class="text-xs text-gray-600">{{ $comment->created_at->diffForHumans() }}</span>
             </div>
             <p class="text-gray-200 mb-2 text-sm">{{ $comment->content }}</p>

@@ -27,7 +27,7 @@
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <p class="font-semibold text-white truncate">{{ $contact->name }}</p>
-                                    <p class="text-xs {{ $selectedContactId === $contact->id ? 'text-white/90' : 'text-gray-400' }}">@{{ $contact->username }}</p>
+                                    <p class="text-xs {{ $selectedContactId === $contact->id ? 'text-white/90' : 'text-gray-400' }}">{{ '@' . ($contact->username ?? strtolower(str_replace(' ', '', $contact->name))) }}</p>
                                 </div>
                             </div>
                         </button>
@@ -53,7 +53,7 @@
                         </div>
                         <div>
                             <h3 class="text-2xl font-bold text-white">{{ $selectedContact->name }}</h3>
-                            <p class="text-blue-600">@{{ $selectedContact->username }}</p>
+                            <p class="text-blue-600">{{ '@' . ($selectedContact->username ?? strtolower(str_replace(' ', '', $selectedContact->name))) }}</p>
                             <p class="text-gray-400 text-sm mt-1">{{ $selectedContact->bio ?? 'No bio' }}</p>
                         </div>
                     </div>
@@ -76,7 +76,7 @@
 
                     <!-- Actions -->
                     <div class="flex gap-2 mb-6">
-                        <button class="flex-1 py-2 px-4 bg-gradient-to-r from-blue-700 to-black text-white rounded-lg font-semibold hover:shadow-lg transition">
+                        <button wire:click="startConversation" class="flex-1 py-2 px-4 bg-gradient-to-r from-blue-700 to-black text-white rounded-lg font-semibold hover:shadow-lg transition">
                             Send Message
                         </button>
                         <button wire:click="removeContact({{ $selectedContact->id }})" class="flex-1 py-2 px-4 bg-red-500/20 text-red-400 border border-red-500/50 rounded-lg font-semibold hover:bg-red-500/30 transition">
@@ -128,7 +128,7 @@
                                     <div class="flex items-center justify-between">
                                         <div>
                                             <p class="font-semibold text-white">{{ $user->name }}</p>
-                                            <p class="text-xs text-gray-400">@{{ $user->username }}</p>
+                                            <p class="text-xs text-gray-400">{{ '@' . ($user->username ?? strtolower(str_replace(' ', '', $user->name))) }}</p>
                                         </div>
                                         <span class="text-blue-600 text-sm">Add</span>
                                     </div>

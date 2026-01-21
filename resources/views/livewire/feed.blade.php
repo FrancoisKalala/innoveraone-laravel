@@ -1,4 +1,36 @@
-<div class="min-h-screen">
+<div class="min-h-screen" x-data="{ showCreatePost: false }" @close-modal.window="showCreatePost = false">
+    <!-- Fixed Floating Action Button -->
+    <button @click="showCreatePost = true" class="fixed bottom-8 right-8 z-50 w-16 h-16 bg-gradient-to-r from-blue-700 to-black rounded-full shadow-2xl shadow-blue-700/50 hover:shadow-blue-700/70 hover:scale-110 transition-all duration-300 flex items-center justify-center group">
+        <svg class="w-8 h-8 text-white group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+    </button>
+
+    <!-- Create Post Modal -->
+    <div x-show="showCreatePost" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 flex items-center justify-center p-4" 
+         style="display: none;">
+        <div @click="showCreatePost = false" class="fixed inset-0 bg-black/50 backdrop-blur-sm"></div>
+        <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border border-blue-700/30 max-w-4xl w-full p-6 relative z-10 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+                    Create New Post
+                </h2>
+                <button @click="showCreatePost = false" class="text-gray-400 hover:text-white transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div>
+                @livewire('post.create-post', ['albumId' => $albumId], key('modal-create-post'))
+            </div>
+        </div>
+    </div>
+
     <!-- Filter Tabs -->
     <div class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur border-b border-blue-700/20">
         <div class="max-w-4xl mx-auto px-4 py-4">
@@ -31,7 +63,6 @@
     </div>
 
     <div class="max-w-4xl mx-auto py-8 px-4">
-        <div class="mb-8">@livewire('post.create-post')</div>
         <div class="space-y-6">
             @forelse($posts as $post)
                 @livewire('post.post-card', ['post' => $post], key($post->id))

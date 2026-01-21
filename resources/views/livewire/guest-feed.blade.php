@@ -77,7 +77,7 @@
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-center gap-2 mb-1">
                                         <h4 class="font-bold text-white">{{ $post->user->name }}</h4>
-                                        <span class="text-gray-500">@{{ $post->user->username }}</span>
+                                        <span class="text-gray-500">{{ '@' . ($post->user->username ?? strtolower(str_replace(' ', '', $post->user->name))) }}</span>
                                     </div>
                                     <p class="text-xs text-gray-400">{{ $post->created_at->diffForHumans() }}</p>
                                 </div>

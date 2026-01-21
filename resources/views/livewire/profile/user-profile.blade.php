@@ -19,7 +19,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Username</label>
-                        <div class="px-4 py-2 bg-slate-800 rounded-lg text-white">@{{ auth()->user()->username }}</div>
+                        <div class="px-4 py-2 bg-slate-800 rounded-lg text-white">{{ '@' . (auth()->user()->username ?? strtolower(str_replace(' ', '', auth()->user()->name))) }}</div>
                     </div>
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
