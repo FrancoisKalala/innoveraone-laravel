@@ -1,5 +1,5 @@
-<div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border border-blue-500/20 hover:border-blue-500/40 transition shadow-2xl group" wire:key="post-card-{{ $post->id }}">
-    <div class="p-6 bg-gradient-to-r from-blue-500/10 to-black/10 border-b border-blue-500/20">
+<div class="bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-2xl border border-blue-700/20 overflow-hidden hover:border-blue-700/40 transition" wire:key="post-card-{{ $post->id }}">
+    <div class="p-6 border-b border-blue-700/10">
         <div class="flex items-start justify-between mb-4">
             <div class="flex items-center gap-4 flex-1">
                 <!-- Avatar with Explore Design Style -->

@@ -144,6 +144,11 @@ class ContactsManager extends Component
         }
     }
 
+    public function shareContact($contactId)
+    {
+        session()->flash('success', 'Contact shared successfully!');
+    }
+
     public function cancelSentRequest($contactId)
     {
         $contact = Contact::where('user_id', auth()->id())
@@ -159,113 +164,28 @@ class ContactsManager extends Component
 
     public function render()
     {
-        // Perform search if query exists
-        $searchResults = collect([]);
         $searchTerm = trim($this->searchQuery);
 
-        if (strlen($searchTerm) >= 2) {
-            $searchPattern = '%' . $searchTerm . '%';
-            $userId = auth()->id();
+        $myContacts = $this->getMyContacts();
+        $sentRequests = $this->getSentRequests();
+        $receivedRequests = $this->getReceivedRequests();
 
-            // Get my contacts
-            $myContactIds = Contact::where(function($query) use ($userId) {
-                $query->where('user_id', $userId)
-                      ->orWhere('contact_id', $userId);
-            })
-            ->where('status', 'accepted')
-            ->get()
-            ->map(function ($contact) use ($userId) {
-                return $contact->user_id === $userId ? $contact->contact_id : $contact->user_id;
-            })
-            ->toArray();
-
-            // Get sent request IDs
-            $sentRequestIds = Contact::where('user_id', $userId)
-                ->where('status', 'pending')
-                ->pluck('contact_id')
-                ->toArray();
-
-            // Get received request IDs
-            $receivedRequestIds = Contact::where('contact_id', $userId)
-                ->where('status', 'pending')
-                ->pluck('user_id')
-                ->toArray();
-
-            // Search in my contacts first
-            $myContactsResults = collect([]);
-            if (count($myContactIds) > 0) {
-                $myContactsResults = User::whereIn('id', $myContactIds)
-                    ->where(function ($query) use ($searchPattern) {
-                        $query->where('name', 'like', $searchPattern)
-                              ->orWhere('username', 'like', $searchPattern);
-                    })
-                    ->get()
-                    ->map(function($user) {
-                        $user->category = 'My Contact';
-                        return $user;
-                    });
-            }
-
-            // Search in sent requests
-            $sentRequestsResults = collect([]);
-            if (count($sentRequestIds) > 0) {
-                $sentRequestsResults = User::whereIn('id', $sentRequestIds)
-                    ->where(function ($query) use ($searchPattern) {
-                        $query->where('name', 'like', $searchPattern)
-                              ->orWhere('username', 'like', $searchPattern);
-                    })
-                    ->get()
-                    ->map(function($user) {
-                        $user->category = 'Sent Request';
-                        return $user;
-                    });
-            }
-
-            // Search in received requests
-            $receivedRequestsResults = collect([]);
-            if (count($receivedRequestIds) > 0) {
-                $receivedRequestsResults = User::whereIn('id', $receivedRequestIds)
-                    ->where(function ($query) use ($searchPattern) {
-                        $query->where('name', 'like', $searchPattern)
-                              ->orWhere('username', 'like', $searchPattern);
-                    })
-                    ->get()
-                    ->map(function($user) {
-                        $user->category = 'Received Request';
-                        return $user;
-                    });
-            }
-
-            // Get all excluded IDs (contacts + requests + current user)
-            $excludedIds = array_merge($myContactIds, $sentRequestIds, $receivedRequestIds, [$userId]);
-
-            // Search in all other users
-            $otherUsersResults = User::whereNotIn('id', $excludedIds)
-                ->where(function ($query) use ($searchPattern) {
-                    $query->where('name', 'like', $searchPattern)
-                          ->orWhere('username', 'like', $searchPattern);
-                })
-                ->limit(10)
-                ->get()
-                ->map(function($user) {
-                    $user->category = 'Other User';
-                    return $user;
-                });
-
-            // Combine results in priority order
-            $searchResults = $myContactsResults
-                ->concat($sentRequestsResults)
-                ->concat($receivedRequestsResults)
-                ->concat($otherUsersResults)
-                ->take(20)
-                ->values();
+        if (strlen($searchTerm) >= 1) {
+            $myContacts = $myContacts->filter(function($user) use ($searchTerm) {
+                return stripos($user->name, $searchTerm) !== false || stripos($user->username ?? '', $searchTerm) !== false;
+            })->values();
+            $sentRequests = $sentRequests->filter(function($user) use ($searchTerm) {
+                return stripos($user->name, $searchTerm) !== false || stripos($user->username ?? '', $searchTerm) !== false;
+            })->values();
+            $receivedRequests = $receivedRequests->filter(function($user) use ($searchTerm) {
+                return stripos($user->name, $searchTerm) !== false || stripos($user->username ?? '', $searchTerm) !== false;
+            })->values();
         }
 
         return view('livewire.contact.contacts-manager', [
-            'myContacts' => $this->getMyContacts(),
-            'sentRequests' => $this->getSentRequests(),
-            'receivedRequests' => $this->getReceivedRequests(),
-            'searchResults' => $searchResults,
+            'myContacts' => $myContacts,
+            'sentRequests' => $sentRequests,
+            'receivedRequests' => $receivedRequests,
         ]);
     }
 }

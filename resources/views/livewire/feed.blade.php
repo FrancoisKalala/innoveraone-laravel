@@ -1,5 +1,5 @@
-<div class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black">
-    <div class="px-4 mx-auto max-w-7xl" x-data="{ showCreatePost: false }" @close-modal.window="showCreatePost = false">
+<div class="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+    <div class="px-4 py-8 mx-auto max-w-3xl" x-data="{ showCreatePost: false }" @close-modal.window="showCreatePost = false">
         <!-- Create Post Modal -->
         <div x-show="showCreatePost"
              x-transition:enter="transition ease-out duration-300"
@@ -28,8 +28,8 @@
         </div>
 
         <!-- Filter Tabs with Search State -->
-        <div x-data="{ searchExpanded: false, showRecent: false }" @click.away="showRecent = false" class="sticky top-0 z-40 bg-gradient-to-br from-slate-900 via-slate-800 to-black">
-            <div class="flex items-center justify-between gap-2 px-4 py-4 border-b border-blue-700/20">
+        <div x-data="{ searchExpanded: false, showRecent: false }" @click.away="showRecent = false" class="sticky top-0 z-40 bg-gradient-to-r from-slate-900/95 to-black/95 border-b border-blue-700/20 backdrop-blur">
+            <div class="flex items-center justify-between gap-2 px-4 py-4">
                 <div class="flex gap-2 overflow-x-auto">
                     <button wire:click="setFilter('all')" class="px-6 py-3 font-semibold {{ $filterType === 'all' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-white' }} transition whitespace-nowrap">
                         <span class="flex items-center gap-2">
@@ -160,9 +160,11 @@
                     if (sentinel) observer.observe(sentinel);
                 }, 100);
             });
-        " class="space-y-6 mt-8 px-4">
+        " class="mt-8 mb-8">
             @forelse($posts as $post)
-                @livewire('post.post-card', ['post' => $post], key($post->id))
+                <div class="mb-6">
+                    @livewire('post.post-card', ['post' => $post], key($post->id))
+                </div>
             @empty
                 <div class="text-center py-20">
                     <div class="w-16 h-16 bg-gradient-to-br from-blue-700 to-black rounded-full mx-auto mb-4 opacity-20"></div>
