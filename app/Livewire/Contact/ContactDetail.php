@@ -12,18 +12,53 @@ class ContactDetail extends Component
     public $selectedContactId = null;
     public $selectedContact = null;
     public $searchQuery = '';
+    public $recentSearches = [];
     public $showSearchModal = false;
     public $searchResults = [];
 
     public function mount()
     {
+        $this->recentSearches = session()->get($this->recentSearchSessionKey(), []);
         $this->loadContacts();
+    }
+
+    public function useRecentSearch($index)
+    {
+        if (!isset($this->recentSearches[$index])) {
+            return;
+        }
+        $term = $this->recentSearches[$index];
+        $this->searchQuery = $term;
+        $this->addRecentSearch($term);
+    }
+
+    protected function addRecentSearch($term)
+    {
+        $term = trim($term);
+        if (mb_strlen($term) < 2) {
+            return;
+        }
+        $filtered = collect($this->recentSearches)
+            ->filter(fn($existing) => strcasecmp($existing, $term) !== 0)
+            ->values();
+        $this->recentSearches = collect([$term])
+            ->merge($filtered)
+            ->take(10)
+            ->values()
+            ->toArray();
+        session()->put($this->recentSearchSessionKey(), $this->recentSearches);
+    }
+
+    protected function recentSearchSessionKey(): string
+    {
+        $userId = auth()->id();
+        return 'recent_searches_contacts_' . ($userId ?: 'guest');
     }
 
     public function loadContacts()
     {
         $userId = auth()->id();
-        
+
         $this->contacts = Contact::where(function($query) use ($userId) {
             $query->where('user_id', $userId)
                   ->orWhere('contact_id', $userId);
@@ -62,6 +97,8 @@ class ContactDetail extends Component
             $this->searchResults = [];
             return;
         }
+
+        $this->addRecentSearch($this->searchQuery);
 
         $this->searchResults = User::where(function ($query) {
             $query->where('name', 'like', '%' . $this->searchQuery . '%')

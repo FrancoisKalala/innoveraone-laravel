@@ -16,6 +16,7 @@ class ChatDetail extends Component
     public $messages = [];
     public $messageContent = '';
     public $searchQuery = '';
+    public $recentSearches = [];
     public $showNewMessageModal = false;
     public $newContactSearch = '';
     public $availableContacts = [];
@@ -24,7 +25,47 @@ class ChatDetail extends Component
 
     public function mount()
     {
+        $this->recentSearches = session()->get($this->recentSearchSessionKey(), []);
         $this->loadConversations();
+    }
+
+    public function updatedSearchQuery()
+    {
+        if (!empty($this->searchQuery)) {
+            $this->addRecentSearch($this->searchQuery);
+        }
+    }
+
+    public function useRecentSearch($index)
+    {
+        if (!isset($this->recentSearches[$index])) {
+            return;
+        }
+        $this->searchQuery = $this->recentSearches[$index];
+        $this->loadConversations();
+    }
+
+    protected function addRecentSearch($term)
+    {
+        $term = trim($term);
+        if (mb_strlen($term) < 2) {
+            return;
+        }
+        $filtered = collect($this->recentSearches)
+            ->filter(fn($existing) => strcasecmp($existing, $term) !== 0)
+            ->values();
+        $this->recentSearches = collect([$term])
+            ->merge($filtered)
+            ->take(10)
+            ->values()
+            ->toArray();
+        session()->put($this->recentSearchSessionKey(), $this->recentSearches);
+    }
+
+    protected function recentSearchSessionKey(): string
+    {
+        $userId = auth()->id();
+        return 'recent_searches_messages_' . ($userId ?: 'guest');
     }
 
     #[On('start-conversation')]
@@ -36,13 +77,33 @@ class ChatDetail extends Component
     public function loadConversations()
     {
         $userId = auth()->id();
-        
+
         // Get all conversations for the user (messages they sent or received)
-        $this->conversations = Message::where(function($query) use ($userId) {
+        $query = Message::where(function($query) use ($userId) {
             $query->where('sender_id', $userId)
                   ->orWhere('receiver_id', $userId);
         })
-        ->with(['sender', 'receiver'])
+        ->with(['sender', 'receiver']);
+
+        // Apply search filter
+        if (!empty($this->searchQuery)) {
+            $searchTerm = '%' . $this->searchQuery . '%';
+            $query->where(function($q) use ($searchTerm, $userId) {
+                // Search in message content
+                $q->where('content', 'like', $searchTerm)
+                  // Or search in sender/receiver names
+                  ->orWhereHas('sender', function($userQuery) use ($searchTerm) {
+                      $userQuery->where('name', 'like', $searchTerm)
+                                ->orWhere('username', 'like', $searchTerm);
+                  })
+                  ->orWhereHas('receiver', function($userQuery) use ($searchTerm) {
+                      $userQuery->where('name', 'like', $searchTerm)
+                                ->orWhere('username', 'like', $searchTerm);
+                  });
+            });
+        }
+
+        $this->conversations = $query
         ->orderBy('created_at', 'desc')
         ->distinct()
         ->get()
@@ -95,7 +156,7 @@ class ChatDetail extends Component
 
         $userId = auth()->id();
         $conversationId = $this->selectedConversationId;
-        
+
         // Get messages between current user and selected contact
         $this->messages = Message::where(function($query) use ($userId, $conversationId) {
             $query->where(function($q) use ($userId, $conversationId) {

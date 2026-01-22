@@ -9,9 +9,7 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet" />
 
-    <!-- Tailwind CSS & Alpine.js -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
         @keyframes blob {
@@ -29,7 +27,7 @@
     </style>
 </head>
 <body class="antialiased">
-    <div class="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 via-30% via-blue-900 via-60% to-slate-900 text-white overflow-hidden relative">
+    <div class="min-h-screen bg    <div class="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 via-30% via-blue-900 via-60% to-slate-900 text-white overflow-hidden relative">
         <!-- Animated Background Blobs -->
         <div class="absolute inset-0 overflow-hidden pointer-events-none">
             <div class="blob absolute top-0 -left-4 w-96 h-96 bg-blue-700 rounded-full mix-blend-multiply filter blur-3xl opacity-15"></div>
@@ -41,7 +39,7 @@
         <nav class="relative z-50 px-6 py-6">
             <div class="max-w-7xl mx-auto flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 bg-gradient-to-br from-blue-700 to-black rounded-2xl flex items-center justify-center shadow-lg shadow-blue-700/50 float">
+                                <div class="w-12 h-12 bg-gradient-to-br from-blue-700 to-black rounded-2xl flex items-center justify-center shadow-lg shadow-blue-700/50 float">
                         <svg class="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm0-13c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5z"/>
                         </svg>

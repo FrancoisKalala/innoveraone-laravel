@@ -19,11 +19,14 @@ class Message extends Model
         'is_read',
         'read_at',
         'is_deleted',
+        'is_forwarded_post',
+        'forwarded_post_id',
     ];
 
     protected $casts = [
         'is_read' => 'boolean',
         'is_deleted' => 'boolean',
+        'is_forwarded_post' => 'boolean',
         'read_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
@@ -63,6 +66,12 @@ class Message extends Model
     public function deletions()
     {
         return $this->hasMany(DeletedMessage::class);
+    }
+
+    // Forwarded post
+    public function forwardedPost()
+    {
+        return $this->belongsTo(Post::class, 'forwarded_post_id');
     }
 
     // Mark message as read

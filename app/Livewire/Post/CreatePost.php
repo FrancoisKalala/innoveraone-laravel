@@ -18,6 +18,8 @@ class CreatePost extends Component
     public $expiration_hours = 24;
     public $interaction_type = 'all';
     public $albums;
+    public $showReviewModal = false;
+    public $reviewFileIndex = null;
 
     public function mount($albumId = null)
     {
@@ -25,6 +27,23 @@ class CreatePost extends Component
         if ($albumId) {
             $this->album_id = $albumId;
         }
+    }
+
+    public function removeFile($index): void
+    {
+        array_splice($this->files, $index, 1);
+    }
+
+    public function reviewFile($index): void
+    {
+        $this->reviewFileIndex = $index;
+        $this->showReviewModal = true;
+    }
+
+    public function closeReviewModal(): void
+    {
+        $this->showReviewModal = false;
+        $this->reviewFileIndex = null;
     }
 
     public function createPost()
@@ -51,7 +70,7 @@ class CreatePost extends Component
         foreach ($this->files as $file) {
             // Compress file (WebP for images, H.264 for videos, AAC for audio)
             $compressedFile = $compressionService->compress($file);
-            
+
             $path = $compressedFile->store('posts', 'public');
             $post->files()->create([
                 'file_path' => $path,

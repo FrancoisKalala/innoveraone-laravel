@@ -4,159 +4,92 @@ use Livewire\Volt\Component;
 
 new class extends Component
 {
-    public $collapsed = false;
-    public array $items = [];
-
-    public function toggle(): void
-    {
-        $this->collapsed = ! $this->collapsed;
-    }
-
-    public function mount(): void
-    {
-        $user = auth()->user();
-
-        $this->items = [
-            [
-                'label' => 'Feed',
-                'url' => route('dashboard'),
-                'active' => request()->routeIs('dashboard'),
-                'icon' => 'home',
-                'badge' => null,
-            ],
-            [
-                'label' => 'Explore',
-                'url' => route('explore'),
-                'active' => request()->routeIs('explore'),
-                'icon' => 'search',
-                'badge' => null,
-            ],
-            [
-                'label' => 'Messages',
-                'url' => route('messages'),
-                'active' => request()->routeIs('messages'),
-                'icon' => 'chat',
-                'badge' => null,
-            ],
-            [
-                'label' => 'Contacts',
-                'url' => route('contacts'),
-                'active' => request()->routeIs('contacts'),
-                'icon' => 'users',
-                'badge' => method_exists($user, 'contacts') ? $user->contacts()->count() : null,
-            ],
-            [
-                'label' => 'Groups',
-                'url' => route('groups'),
-                'active' => request()->routeIs('groups'),
-                'icon' => 'group',
-                'badge' => method_exists($user, 'groups') ? $user->groups()->count() : null,
-            ],
-            [
-                'label' => 'Albums',
-                'url' => route('albums'),
-                'active' => request()->routeIs('albums*'),
-                'icon' => 'book',
-                'badge' => method_exists($user, 'chapters') ? $user->chapters()->count() : null,
-            ],
-            [
-                'label' => 'Profile',
-                'url' => route('profile'),
-                'active' => request()->routeIs('profile'),
-                'icon' => 'user',
-                'badge' => null,
-            ],
-        ];
-    }
 }; ?>
 
-<aside class="{{ $collapsed ? 'w-16' : 'w-64' }} bg-slate-900/80 backdrop-blur-xl border-r border-blue-700/20 flex flex-col transition-all duration-200">
-    <!-- Header -->
-    <div class="p-4 border-b border-blue-700/20">
-        <div class="flex items-center justify-between gap-3">
-            <div class="w-10 h-10 bg-gradient-to-br from-blue-700 to-black rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/50">
-                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm0-13c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5z"/>
-                </svg>
-            </div>
-            @if (! $collapsed)
-                <h1 class="text-xl font-bold bg-gradient-to-r from-blue-600 to-black bg-clip-text text-transparent">InnoveraOne</h1>
-            @endif
-            <button wire:click="toggle" class="ml-auto p-2 rounded-lg text-gray-300 hover:text-white hover:bg-white/5" aria-label="Toggle sidebar">
-                @if ($collapsed)
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12h16M14 6l6 6-6 6"/></svg>
-                @else
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4m6 6l-6-6 6-6"/></svg>
-                @endif
-            </button>
-        </div>
-    </div>
+<div x-data="{ showCreatePost: false }" @close-modal.window="showCreatePost = false">
+    <!-- Action Buttons (top-right) - Global -->
+    <div class="fixed top-6 right-6 z-50 flex flex-col gap-4">
+        <!-- Profile Button -->
+        <a href="{{ route('profile') }}" class="w-14 h-14 bg-gradient-to-r from-purple-700 to-black rounded-full shadow-2xl shadow-purple-700/50 hover:shadow-purple-700/70 hover:scale-110 transition-all duration-300 flex items-center justify-center group" aria-label="Profile">
+            <svg class="w-7 h-7 text-white group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+        </a>
 
-    <!-- Menu -->
-    <nav class="flex-1 p-4 space-y-2">
-        @foreach ($items as $item)
-            <a href="{{ $item['url'] }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition
-                {{ $item['active'] ? 'bg-gradient-to-r from-blue-700 to-black text-white shadow-lg shadow-blue-500/30' : 'text-gray-300 hover:bg-slate-800/50 hover:text-white' }}">
-                @switch($item['icon'])
-                    @case('home')
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                        @break
-                    @case('search')
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        @break
-                    @case('chat')
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-                        @break
-                    @case('users')
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                        @break
-                    @case('group')
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                        @break
-                    @case('book')
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-                        @break
-                    @case('trash')
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                        @break
-                    @case('user')
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                        @break
-                @endswitch
-                @if (! $collapsed)
-                    <span class="font-medium">{{ $item['label'] }}</span>
-                    @if (!is_null($item['badge']))
-                        <span class="ml-auto px-2 py-0.5 text-xs rounded-lg bg-white/10 border border-blue-700/30 text-blue-200">
-                            {{ $item['badge'] }}
-                        </span>
-                    @endif
-                @endif
-            </a>
-        @endforeach
-    </nav>
+        <!-- Create Post Button -->
+        <button @click="showCreatePost = true" class="w-14 h-14 bg-gradient-to-r from-blue-700 to-black rounded-full shadow-2xl shadow-blue-700/50 hover:shadow-blue-700/70 hover:scale-110 transition-all duration-300 flex items-center justify-center group">
+            <svg class="w-7 h-7 text-white group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        </button>
 
-    <!-- User Info & Logout -->
-    <div class="p-4 border-t border-blue-700/20">
-        <div class="flex items-center gap-3 mb-3 px-2">
-            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-700 to-black flex items-center justify-center text-white font-bold">
-                {{ substr(auth()->user()->name, 0, 1) }}
-            </div>
-            @if (! $collapsed)
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm font-semibold text-white truncate">{{ auth()->user()->name }}</p>
-                    <p class="text-xs text-gray-400 truncate">{{ auth()->user()->email }}</p>
+        <!-- Album Button -->
+        <a href="{{ route('albums') }}" class="w-14 h-14 bg-gradient-to-r from-indigo-700 to-black rounded-full shadow-2xl shadow-indigo-700/50 hover:shadow-indigo-700/70 hover:scale-110 transition-all duration-300 flex items-center justify-center group" aria-label="Albums">
+            <svg class="w-7 h-7 text-white group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        </a>
+
+        <!-- Create Post Modal -->
+        <div x-show="showCreatePost"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 z-50 flex items-center justify-center p-4"
+             style="display: none;">
+            <div @click="showCreatePost = false" class="fixed inset-0 bg-black/50 backdrop-blur-sm"></div>
+            <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border border-blue-700/30 max-w-4xl w-full p-6 relative z-10 max-h-[90vh] overflow-y-auto">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+                        Create New Post
+                    </h2>
+                    <button @click="showCreatePost = false" class="text-gray-400 hover:text-white transition">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
                 </div>
-            @endif
+                <div>
+                    @livewire('post.create-post', key('global-create-post'))
+                </div>
+            </div>
         </div>
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 transition">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                @if (! $collapsed)
-                    <span class="text-sm font-medium">Logout</span>
-                @endif
-            </button>
-        </form>
     </div>
-</aside>
+
+    <!-- Bottom Tab Bar (global navigation) -->
+    <nav class="fixed inset-x-0 bottom-0 z-40 bg-slate-900/85 backdrop-blur-md border-t border-white/10">
+        <div class="max-w-4xl mx-auto px-4 py-2 flex items-center justify-center gap-8 text-sm font-semibold text-gray-300">
+            <a href="{{ route('dashboard') }}" class="group flex flex-col items-center gap-2 transition-all duration-200 {{ request()->routeIs('dashboard', 'dashboard.*') ? 'text-white' : 'hover:text-white' }}" aria-label="Home">
+                <div class="w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200 {{ request()->routeIs('dashboard', 'dashboard.*') ? 'bg-gradient-to-r from-blue-700 to-black border border-blue-500/50 shadow-2xl shadow-blue-700/40 scale-105' : 'bg-slate-800/60 border border-white/5 group-hover:bg-slate-700/70 group-hover:scale-105' }}">
+                    <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2 7-7 7 7 2 2v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg>
+                </div>
+                <span class="text-xs">Home</span>
+            </a>
+
+            <a href="{{ route('explore') }}" class="group flex flex-col items-center gap-2 transition-all duration-200 {{ request()->routeIs('explore', 'explore.*') ? 'text-white' : 'hover:text-white' }}" aria-label="Explore">
+                <div class="w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200 {{ request()->routeIs('explore', 'explore.*') ? 'bg-gradient-to-r from-blue-700 to-black border border-blue-500/50 shadow-2xl shadow-blue-700/40 scale-105' : 'bg-slate-800/60 border border-white/5 group-hover:bg-slate-700/70 group-hover:scale-105' }}">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-4.35-4.35M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16z"/></svg>
+                </div>
+                <span class="text-xs">Explore</span>
+            </a>
+
+            <a href="{{ route('messages') }}" class="group flex flex-col items-center gap-2 transition-all duration-200 {{ request()->routeIs('messages', 'messages.*') ? 'text-white' : 'hover:text-white' }}" aria-label="Messages">
+                <div class="w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200 {{ request()->routeIs('messages', 'messages.*') ? 'bg-gradient-to-r from-blue-700 to-black border border-blue-500/50 shadow-2xl shadow-blue-700/40 scale-105' : 'bg-slate-800/60 border border-white/5 group-hover:bg-slate-700/70 group-hover:scale-105' }}">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                </div>
+                <span class="text-xs">Messages</span>
+            </a>
+
+            <a href="{{ route('contacts-manager') }}" class="group flex flex-col items-center gap-2 transition-all duration-200 {{ request()->routeIs('contacts-manager', 'contacts-manager.*') ? 'text-white' : 'hover:text-white' }}" aria-label="Contacts">
+                <div class="w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200 {{ request()->routeIs('contacts-manager', 'contacts-manager.*') ? 'bg-gradient-to-r from-blue-700 to-black border border-blue-500/50 shadow-2xl shadow-blue-700/40 scale-105' : 'bg-slate-800/60 border border-white/5 group-hover:bg-slate-700/70 group-hover:scale-105' }}">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                </div>
+                <span class="text-xs">Contacts</span>
+            </a>
+
+            <a href="{{ route('groups') }}" class="group flex flex-col items-center gap-2 transition-all duration-200 {{ request()->routeIs('groups', 'groups.*') ? 'text-white' : 'hover:text-white' }}" aria-label="Groups">
+                <div class="w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200 {{ request()->routeIs('groups', 'groups.*') ? 'bg-gradient-to-r from-blue-700 to-black border border-blue-500/50 shadow-2xl shadow-blue-700/40 scale-105' : 'bg-slate-800/60 border border-white/5 group-hover:bg-slate-700/70 group-hover:scale-105' }}">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 12H9m6 0a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                </div>
+                <span class="text-xs">Groups</span>
+            </a>
+        </div>
+    </nav>
+</div>
 

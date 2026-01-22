@@ -18,6 +18,7 @@ class Post extends Model
         'interaction_type',
         'already_expired',
         'already_deleted',
+        'shares',
     ];
 
     protected $casts = [

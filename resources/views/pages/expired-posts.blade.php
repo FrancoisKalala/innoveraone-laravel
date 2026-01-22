@@ -5,7 +5,9 @@
         </h2>
     </x-slot>
 
-    <div class="py-12">
+    <livewire:layout.sidebar />
+
+    <div class="py-12 pb-32">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             @livewire('post.expired-posts')
         </div>

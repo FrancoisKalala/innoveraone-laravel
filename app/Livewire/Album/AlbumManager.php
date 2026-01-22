@@ -21,9 +21,12 @@ class AlbumManager extends Component
     public $customCategory = '';
     public $useCustomCategory = false;
     public $slug = '';
+    public $searchQuery = '';
+    public $recentSearches = [];
 
     public function mount(): void
     {
+        $this->recentSearches = session()->get($this->recentSearchSessionKey(), []);
         $this->loadAlbums();
         // If arriving with an edit query param, open the edit modal
         if (request()->has('edit')) {
@@ -36,6 +39,48 @@ class AlbumManager extends Component
         if (request()->has('create')) {
             $this->openCreateModal();
         }
+    }
+
+    public function updatedSearchQuery()
+    {
+        $this->loadAlbums();
+        if (!empty($this->searchQuery)) {
+            $this->addRecentSearch($this->searchQuery);
+        }
+    }
+
+    public function useRecentSearch($index)
+    {
+        if (!isset($this->recentSearches[$index])) {
+            return;
+        }
+        $term = $this->recentSearches[$index];
+        $this->searchQuery = $term;
+        $this->addRecentSearch($term);
+        $this->loadAlbums();
+    }
+
+    protected function addRecentSearch($term)
+    {
+        $term = trim($term);
+        if (mb_strlen($term) < 2) {
+            return;
+        }
+        $filtered = collect($this->recentSearches)
+            ->filter(fn($existing) => strcasecmp($existing, $term) !== 0)
+            ->values();
+        $this->recentSearches = collect([$term])
+            ->merge($filtered)
+            ->take(10)
+            ->values()
+            ->toArray();
+        session()->put($this->recentSearchSessionKey(), $this->recentSearches);
+    }
+
+    protected function recentSearchSessionKey(): string
+    {
+        $userId = auth()->id();
+        return 'recent_searches_albums_' . ($userId ?: 'guest');
     }
 
     public function loadAlbums(): void

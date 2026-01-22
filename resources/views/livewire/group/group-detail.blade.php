@@ -1,4 +1,28 @@
-<div class="grid md:grid-cols-3 gap-6 space-y-6 md:space-y-0">
+<div x-data="{ activeTab: 'my-groups' }">
+    <!-- Tabs Navigation -->
+    <div class="flex gap-2 border-b border-blue-700/20 mb-6">
+        <button @click="activeTab = 'my-groups'" :class="activeTab === 'my-groups' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-white'" class="px-6 py-3 font-semibold transition">
+            <span class="flex items-center gap-2">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                My Groups
+            </span>
+        </button>
+        <button @click="activeTab = 'discover'" :class="activeTab === 'discover' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-white'" class="px-6 py-3 font-semibold transition">
+            <span class="flex items-center gap-2">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                Discover
+            </span>
+        </button>
+        <button @click="activeTab = 'invitations'" :class="activeTab === 'invitations' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-white'" class="px-6 py-3 font-semibold transition">
+            <span class="flex items-center gap-2">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h14l4 4V6c0-1.1-.9-2-2-2z"/></svg>
+                Invitations
+            </span>
+        </button>
+    </div>
+
+    <!-- My Groups Tab Content -->
+    <div x-show="activeTab === 'my-groups'" class="grid md:grid-cols-3 gap-6 space-y-6 md:space-y-0">
     <!-- Main Chat Area -->
     <div class="md:col-span-2 bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-2xl border border-blue-700/20 p-6 flex flex-col h-[600px]">
         @if($selectedGroup)
@@ -52,7 +76,7 @@
                                         @endif
                                     </div>
                                 @endif
-                                
+
                                 @if($editingMessageId !== $message->id && (auth()->id() === $message->user_id || auth()->id() === $selectedGroup->created_by))
                                     <div class="absolute -right-24 top-1/2 -translate-y-1/2 {{ $message->user_id === auth()->id() ? '-left-24 -right-auto' : '' }} opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
                                         <button wire:click="showMessageDetails({{ $message->id }})" class="p-2 hover:bg-blue-500/20 rounded" title="Message info">
@@ -374,5 +398,6 @@
             </div>
         </div>
     @endif
+</div>
 </div>
 
