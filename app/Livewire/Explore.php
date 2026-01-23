@@ -7,14 +7,19 @@ use App\Models\Follower;
 use Livewire\Component;
 use Livewire\Attributes\On;
 
+
 class Explore extends Component
 {
     public $searchQuery = '';
     public $recentSearches = [];
+    public $activeTab = 'users';
 
     public function mount()
     {
         $this->recentSearches = session()->get($this->recentSearchSessionKey(), []);
+        if (!$this->activeTab) {
+            $this->activeTab = 'users';
+        }
     }
 
     public function updatedSearchQuery()
@@ -111,6 +116,7 @@ class Explore extends Component
         return view('livewire.explore', [
             'users' => $users,
             'albums' => $albums,
+            'activeTab' => $this->activeTab,
         ]);
     }
 }

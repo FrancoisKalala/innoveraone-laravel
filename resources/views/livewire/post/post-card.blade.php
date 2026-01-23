@@ -92,111 +92,53 @@
         <p class="text-gray-100 text-base leading-relaxed">{{ Str::limit($post->content, 300) }}</p>
 
         @if($files->count() > 0)
-            <!-- Images Grid -->
-            @php $images = $files->filter(fn($f) => str_contains($f->file_type, 'image')); @endphp
-            @if($images->count() > 0)
-                <div class="mt-4 space-y-2">
-                    <p class="text-xs text-blue-400 font-semibold">🖼️ IMAGES ({{ $images->count() }})</p>
-                    <div class="grid gap-3 @if($images->count() == 1) grid-cols-1 @elseif($images->count() == 2) grid-cols-2 @else grid-cols-3 @endif">
-                        @foreach($images as $file)
-                            <div class="relative group rounded-lg overflow-hidden ring-1 ring-blue-500/20 bg-slate-900">
-                                <img src="{{ asset('storage/' . $file->file_path) }}" alt="Post image" class="w-full h-auto max-h-[600px] object-contain group-hover:scale-105 transition">
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            @endif
-
-            <!-- Videos -->
-            @php $videos = $files->filter(fn($f) => str_contains($f->file_type, 'video')); @endphp
-            @if($videos->count() > 0)
-                <div class="mt-4 space-y-2">
-                    <p class="text-xs text-purple-400 font-semibold">🎬 VIDEOS ({{ $videos->count() }})</p>
-                    <div class="space-y-3">
-                        @foreach($videos as $file)
-                            <video class="w-full h-auto max-h-[600px] rounded-lg bg-black ring-1 ring-blue-500/20" controls>
-                                <source src="{{ asset('storage/' . $file->file_path) }}" type="{{ $file->file_type }}">
-                            </video>
-                        @endforeach
-                    </div>
-                </div>
-            @endif
-
-            <!-- Audio -->
-            @php $audio = $files->filter(fn($f) => str_contains($f->file_type, 'audio')); @endphp
-            @if($audio->count() > 0)
-                <div class="mt-4 space-y-2">
-                    <p class="text-xs text-green-400 font-semibold">🎵 AUDIO ({{ $audio->count() }})</p>
-                    <div class="space-y-2">
-                        @foreach($audio as $file)
-                            <div class="bg-gradient-to-r from-green-500/10 to-emerald-500/10 p-3 rounded-lg border border-green-500/20 ring-1 ring-green-500/20">
+            <div x-data="{ fileIndex: 0 }" class="mt-4">
+                <div class="relative flex flex-col items-center justify-center">
+                    @php $fileList = $files->values(); @endphp
+                    <!-- File Display -->
+                    @foreach($fileList as $idx => $file)
+                        <div x-show="fileIndex === {{ $idx }}" x-cloak class="w-full">
+                            @if(str_contains($file->file_type, 'image'))
+                                <img src="{{ asset('storage/' . $file->file_path) }}" alt="Post image" class="w-full h-auto max-h-[600px] object-contain rounded-lg" />
+                            @elseif(str_contains($file->file_type, 'video'))
+                                <video class="w-full h-auto max-h-[600px] rounded-lg bg-black" controls>
+                                    <source src="{{ asset('storage/' . $file->file_path) }}" type="{{ $file->file_type }}">
+                                </video>
+                            @elseif(str_contains($file->file_type, 'audio'))
                                 <audio class="w-full" controls style="height: 36px;">
                                     <source src="{{ asset('storage/' . $file->file_path) }}" type="{{ $file->file_type }}">
                                 </audio>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            @endif
-
-            <!-- PDFs -->
-            @php $pdfs = $files->filter(fn($f) => str_contains($f->file_type, 'pdf')); @endphp
-            @if($pdfs->count() > 0)
-                <div class="mt-4 space-y-2">
-                    <p class="text-xs text-red-400 font-semibold">📄 DOCUMENTS ({{ $pdfs->count() }})</p>
-                    <div class="space-y-2">
-                        @foreach($pdfs as $file)
-                            <a href="{{ asset('storage/' . $file->file_path) }}" target="_blank" class="flex items-center gap-3 p-3 bg-gradient-to-r from-red-500/10 to-pink-500/10 rounded-lg border border-red-500/20 hover:border-red-500/40 transition ring-1 ring-red-500/20">
-                                <svg class="w-6 h-6 text-red-400 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M12,19L8,15H10.5V12H13.5V15H16L12,19Z"/></svg>
-                                <div>
-                                    <p class="text-sm font-semibold text-red-300">{{ basename($file->file_path) }}</p>
-                                    <p class="text-xs text-gray-400">PDF Document • Click to view</p>
-                                </div>
-                                <svg class="w-4 h-4 text-gray-500 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                            </a>
-                        @endforeach
-                    </div>
-                </div>
-            @endif
-
-            <!-- SVG/Vector -->
-            @php $vectors = $files->filter(fn($f) => str_contains($f->file_type, 'svg') || str_ends_with($file->file_path ?? '', '.svg')); @endphp
-            @if($vectors->count() > 0)
-                <div class="mt-4 space-y-2">
-                    <p class="text-xs text-yellow-400 font-semibold">🎨 VECTOR GRAPHICS ({{ $vectors->count() }})</p>
-                    <div class="grid gap-3 grid-cols-2">
-                        @foreach($vectors as $file)
-                            <div class="relative group rounded-lg overflow-hidden bg-gradient-to-br from-yellow-500/10 to-orange-500/10 ring-1 ring-yellow-500/20 flex items-center justify-center h-40">
-                                <svg class="w-12 h-12 text-yellow-400 opacity-50" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/></svg>
-                                <a href="{{ asset('storage/' . $file->file_path) }}" target="_blank" class="absolute inset-0 opacity-0 hover:opacity-100 bg-black/50 flex items-center justify-center transition">
-                                    <p class="text-white text-xs font-semibold">Open SVG</p>
+                            @elseif(str_contains($file->file_type, 'pdf'))
+                                <a href="{{ asset('storage/' . $file->file_path) }}" target="_blank" class="flex items-center gap-3 p-3 bg-gradient-to-r from-red-500/10 to-pink-500/10 rounded-lg border border-red-500/20 hover:border-red-500/40 transition ring-1 ring-red-500/20">
+                                    <svg class="w-6 h-6 text-red-400 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M12,19L8,15H10.5V12H13.5V15H16L12,19Z"/></svg>
+                                    <div>
+                                        <p class="text-sm font-semibold text-red-300">{{ basename($file->file_path) }}</p>
+                                        <p class="text-xs text-gray-400">PDF Document • Click to view</p>
+                                    </div>
+                                    <svg class="w-4 h-4 text-gray-500 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                                 </a>
-                            </div>
-                        @endforeach
-                    </div>
+                            @else
+                                <a href="{{ asset('storage/' . $file->file_path) }}" target="_blank" class="block text-blue-400 underline">Open File</a>
+                            @endif
+                        </div>
+                    @endforeach
+                    <!-- Navigation Arrows -->
+                    @if($fileList->count() > 1)
+                        <button @click="fileIndex = Math.max(0, fileIndex - 1)" :disabled="fileIndex === 0" class="absolute left-2 top-1/2 -translate-y-1/2 bg-slate-800/80 text-white rounded-full p-2 shadow hover:bg-blue-700 transition disabled:opacity-50">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                        </button>
+                        <button @click="fileIndex = Math.min({{ $fileList->count() - 1 }}, fileIndex + 1)" :disabled="fileIndex === {{ $fileList->count() - 1 }}" class="absolute right-2 top-1/2 -translate-y-1/2 bg-slate-800/80 text-white rounded-full p-2 shadow hover:bg-blue-700 transition disabled:opacity-50">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        </button>
+                        <!-- Dots -->
+                        <div class="flex justify-center gap-2 mt-4">
+                            <template x-for="i in {{ $fileList->count() }}" :key="i">
+                                <span :class="fileIndex === i - 1 ? 'bg-blue-400 scale-125' : 'bg-gray-400'" class="w-3 h-3 rounded-full inline-block transition-all duration-200 cursor-pointer" @click="fileIndex = i - 1"></span>
+                            </template>
+                        </div>
+                    @endif
                 </div>
-            @endif
-
-            <!-- 3D Models -->
-            @php $models = $files->filter(fn($f) => str_contains($f->file_type, 'model') || \Illuminate\Support\Str::endsWith($f->file_path ?? '', ['.glb', '.gltf', '.obj'])); @endphp
-            @if($models->count() > 0)
-                <div class="mt-4 space-y-2">
-                    <p class="text-xs text-cyan-400 font-semibold">🎯 3D MODELS ({{ $models->count() }})</p>
-                    <div class="space-y-2">
-                        @foreach($models as $file)
-                            <a href="{{ asset('storage/' . $file->file_path) }}" download class="flex items-center gap-3 p-3 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-lg border border-cyan-500/20 hover:border-cyan-500/40 transition ring-1 ring-cyan-500/20">
-                                <svg class="w-6 h-6 text-cyan-400 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7V12C2 16.5 4.23 20.68 7.5 23.8L12 20L16.5 23.8C19.77 20.68 22 16.5 22 12V7L12 2M12 4.18L19 7.5V12C19 15.03 17.54 17.74 15.35 19.44L12 16.6L8.65 19.44C6.46 17.74 5 15.03 5 12V7.5L12 4.18Z"/></svg>
-                                <div>
-                                    <p class="text-sm font-semibold text-cyan-300">{{ basename($file->file_path) }}</p>
-                                    <p class="text-xs text-gray-400">3D Model • Click to download</p>
-                                </div>
-                                <svg class="w-4 h-4 text-gray-500 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                            </a>
-                        @endforeach
-                    </div>
-                </div>
-            @endif
+            </div>
         @endif
         <div class="flex gap-6 text-sm text-gray-400 pt-4 border-t border-blue-500/20">
             <div class="flex items-center gap-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg><span>{{ $likeCount }}</span></div>

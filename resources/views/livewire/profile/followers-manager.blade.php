@@ -1,54 +1,42 @@
-<div class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black">
+<div class="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
     <div class="flex">
-        <!-- Sidebar -->
         @livewire('layout.sidebar')
-        
-        <!-- Main Content -->
-        <div class="flex-1 px-4 py-8 mx-auto max-w-7xl">
-            <!-- Header -->
-            <div class="mb-8">
-                <h1 class="flex items-center gap-3 mb-2 text-4xl font-bold text-white">
-                    <svg class="w-8 h-8 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                    </svg>
-                    Followers & Following
-                </h1>
-                <p class="text-gray-400">Manage who follows you and who you follow</p>
-            </div>
-
-            <!-- Tabs -->
-            <div class="flex gap-2 mb-8 border-b border-blue-700/20">
-                <button
-                    wire:click="$set('activeTab', 'followers')"
-                    class="px-6 py-3 font-semibold {{ $activeTab === 'followers' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-white' }} transition"
-                >
-                    <span class="flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                        Followers ({{ auth()->user()->followers()->count() }})
-                    </span>
-                </button>
-                <button
-                    wire:click="$set('activeTab', 'following')"
-                    class="px-6 py-3 font-semibold {{ $activeTab === 'following' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-white' }} transition"
-                >
-                    <span class="flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.89 1.97 1.74 1.97 2.95V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
-                        Following ({{ auth()->user()->following()->count() }})
-                    </span>
-                </button>
+        <div class="flex-1 px-4 py-8 mx-auto max-w-3xl" x-data="{ searchExpanded: false, showRecent: false }" @click.away="showRecent = false">
+            <!-- Tabs with Search State -->
+            <div class="z-40 bg-gradient-to-r from-slate-900/95 to-black/95 border-b border-blue-700/20 backdrop-blur">
+                <div class="flex gap-2 px-4 py-4">
+                    <button
+                        wire:click="$set('activeTab', 'followers')"
+                        class="px-6 py-3 font-semibold {{ $activeTab === 'followers' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-white' }} transition whitespace-nowrap"
+                    >
+                        <span class="flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                            Followers ({{ auth()->user()->followers()->count() }})
+                        </span>
+                    </button>
+                    <button
+                        wire:click="$set('activeTab', 'following')"
+                        class="px-6 py-3 font-semibold {{ $activeTab === 'following' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-white' }} transition whitespace-nowrap"
+                    >
+                        <span class="flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.89 1.97 1.74 1.97 2.95V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                            Following ({{ auth()->user()->following()->count() }})
+                        </span>
+                    </button>
+                </div>
             </div>
 
             <!-- Content -->
-            <div>
+            <div class="mt-6">
                 <!-- Followers Tab -->
                 @if($activeTab === 'followers')
-                    <!-- Search Bar -->
+                    <!-- Search Bar for Followers -->
                     <div class="mb-6">
                         <div class="relative">
-                            <input 
-                                type="text" 
+                            <input
+                                type="text"
                                 wire:model.live="followersSearch"
-                                placeholder="Search followers..." 
+                                placeholder="Search followers..."
                                 class="w-full px-4 py-3 bg-slate-700/50 border border-blue-700/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition"
                             >
                             <svg class="absolute right-3 top-3 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -56,7 +44,6 @@
                             </svg>
                         </div>
                     </div>
-
                     <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                         @forelse($followers as $followerRel)
                             @php
@@ -94,7 +81,7 @@
                                                 <!-- Message Icon Button -->
                                                 <div class="absolute top-0 right-0">
                                                     @if ($user->isFollowing(auth()->user()))
-                                                        <button 
+                                                        <button
                                                             type="button"
                                                             class="start-conversation p-1 text-green-400 transition hover:text-green-300"
                                                             data-user-id="{{ $user->id }}"
@@ -104,7 +91,7 @@
                                                             </svg>
                                                         </button>
                                                     @else
-                                                        <button 
+                                                        <button
                                                             type="button"
                                                             class="p-1 text-gray-500 transition cursor-not-allowed"
                                                             disabled
@@ -153,10 +140,10 @@
                     <!-- Search Bar -->
                     <div class="mb-6">
                         <div class="relative">
-                            <input 
-                                type="text" 
+                            <input
+                                type="text"
                                 wire:model.live="followingSearch"
-                                placeholder="Search following..." 
+                                placeholder="Search following..."
                                 class="w-full px-4 py-3 bg-slate-700/50 border border-purple-700/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition"
                             >
                             <svg class="absolute right-3 top-3 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -235,6 +222,7 @@
             </div>
         </div>
     </div>
+    <div class="h-32"></div> <!-- Increased extra space at the bottom -->
 
     @once
         @push('scripts')
