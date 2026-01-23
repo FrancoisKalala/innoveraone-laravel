@@ -12,9 +12,26 @@
 
         <!-- File Upload with Progress -->
         <div class="space-y-2">
-            <div class="border-2 border-dashed border-blue-700/30 rounded-lg p-4 text-center hover:border-blue-700/50 transition cursor-pointer">
-                <input type="file" wire:model="files" multiple accept="image/*,video/*,audio/*,.pdf,.glb,.gltf,.obj,.svg" class="hidden" id="file-upload">
-                <label for="file-upload" class="cursor-pointer"><svg class="w-8 h-8 mx-auto mb-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg><p class="text-gray-300 text-sm">Click to upload media (max 10 files, 50 MB each)</p></label>
+            <div x-data="{
+                isDragging: false,
+                handleDrop(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.isDragging = false;
+                    const files = e.dataTransfer.files;
+                    if (files.length) {
+                        this.$refs.fileInput.files = files;
+                        this.$refs.fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                }
+            }"
+                :class="isDragging ? 'border-blue-500 bg-blue-900/10' : ''"
+                class="border-2 border-dashed border-blue-700/30 rounded-lg p-4 text-center hover:border-blue-700/50 transition cursor-pointer"
+                @dragover.prevent.stop="isDragging = true"
+                @dragleave.prevent.stop="isDragging = false"
+                @drop.prevent.stop="handleDrop($event)">
+                <input type="file" wire:model="files" multiple accept="image/*,video/*,audio/*,.pdf,.glb,.gltf,.obj,.svg" class="hidden" id="file-upload" x-ref="fileInput">
+                <label for="file-upload" class="cursor-pointer"><svg class="w-8 h-8 mx-auto mb-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg><p class="text-gray-300 text-sm">Click or drag files here (max 10 files, 50 MB each)</p></label>
                 @if($files)<div class="mt-2 text-green-400 text-sm">{{ count($files) }} file(s) selected</div>@endif
             </div>
 

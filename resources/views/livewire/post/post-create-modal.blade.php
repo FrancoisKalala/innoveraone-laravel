@@ -54,13 +54,81 @@
                 <!-- File Upload Section -->
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">Media Files</label>
-                    <div class="border-2 border-dashed border-blue-700/30 rounded-lg p-4 text-center hover:border-blue-700/50 transition cursor-pointer bg-slate-700/30">
-                        <input type="file" wire:model="newFiles" multiple accept="image/*,video/*,audio/*,.pdf,.glb,.gltf,.obj,.svg" class="hidden" id="file-upload-modal">
+                    <div x-data="{
+                        isDragging: false,
+                        handleDrop(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            this.isDragging = false;
+                            const files = e.dataTransfer.files;
+                            if (files.length) {
+                                this.$refs.fileInput.files = files;
+                                this.$refs.fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+                            }
+                        }
+                    }"
+                        :class="isDragging ? 'border-blue-500 bg-blue-900/10' : ''"
+                        class="border-2 border-dashed border-blue-700/30 rounded-lg p-4 text-center hover:border-blue-700/50 transition cursor-pointer bg-slate-700/30"
+                        @dragover.prevent.stop="isDragging = true"
+                        @dragleave.prevent.stop="isDragging = false"
+                        @drop.prevent.stop="handleDrop($event)">
+                        <input type="file" wire:model="newFiles" multiple accept="image/*,video/*,audio/*,.pdf,.glb,.gltf,.obj,.svg" class="hidden" id="file-upload-modal" x-ref="fileInput">
                         <label for="file-upload-modal" class="cursor-pointer">
                             <svg class="w-8 h-8 mx-auto mb-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                            <p class="text-gray-300 text-sm">Click to upload media (max 10 files, 50 MB each)</p>
+                            <p class="text-gray-300 text-sm">Click or drag files here (max 10 files, 50 MB each)</p>
                         </label>
-                        @if(count($newFiles) > 0)<div class="mt-2 text-green-400 text-sm">{{ count($newFiles) }} file(s) selected</div>@endif
+                        <!-- Alpine.js handles drag/drop events above -->
+                        @if(count($newFiles) > 0)
+                            <div class="mt-4 grid grid-cols-2 gap-3">
+                                @foreach($newFiles as $file)
+                                    @php
+                                        $mimeType = $file->getMimeType();
+                                        $fileName = $file->getClientOriginalName();
+                                        $isImage = str_starts_with($mimeType, 'image/');
+                                        $isVideo = str_starts_with($mimeType, 'video/');
+                                        $isAudio = str_starts_with($mimeType, 'audio/');
+                                        $isPdf = str_contains($mimeType, 'pdf');
+                                        $isModel = str_ends_with($fileName, '.glb') || str_ends_with($fileName, '.gltf') || str_ends_with($fileName, '.obj');
+                                        $isSvg = str_ends_with($fileName, '.svg');
+                                    @endphp
+                                    <div class="relative bg-slate-700/50 rounded-lg p-3 border border-blue-700/20">
+                                        @if($isImage)
+                                            <img src="{{ $file->temporaryUrl() }}" class="w-full h-24 object-cover rounded mb-2" alt="Media" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                                            <div class="w-full h-24 bg-slate-600 rounded mb-2 flex items-center justify-center hidden">
+                                                <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+                                            </div>
+                                        @elseif($isVideo)
+                                            <video src="{{ $file->temporaryUrl() }}" class="w-full h-24 object-cover rounded mb-2" controls></video>
+                                        @elseif($isAudio)
+                                            <audio src="{{ $file->temporaryUrl() }}" class="w-full" controls style="height: 36px;"></audio>
+                                            <div class="w-full h-24 bg-gradient-to-br from-blue-600 to-blue-900 rounded mb-2 flex items-center justify-center">
+                                                <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3v9.28c-.47-.46-1.12-.75-1.84-.75-1.66 0-3 1.34-3 3s1.34 3 3 3c1.66 0 3-1.34 3-3V7h7V3h-8z"/></svg>
+                                            </div>
+                                        @elseif($isPdf)
+                                            <div class="w-full h-24 bg-gradient-to-br from-red-600 to-red-900 rounded mb-2 flex items-center justify-center">
+                                                <div class="text-center">
+                                                    <div class="text-white font-bold text-lg">PDF</div>
+                                                </div>
+                                            </div>
+                                        @elseif($isModel)
+                                            <div class="w-full h-24 bg-gradient-to-br from-cyan-600 to-cyan-900 rounded mb-2 flex items-center justify-center">
+                                                <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M6 2c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L17.5 9H13z" opacity="0.3"/><path d="M9 11h6v2H9zm0 4h6v2H9z"/></svg>
+                                            </div>
+                                        @elseif($isSvg)
+                                            <div class="w-full h-24 bg-gradient-to-br from-yellow-500 to-yellow-900 rounded mb-2 flex items-center justify-center">
+                                                <svg class="w-8 h-8 text-yellow-400" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
+                                            </div>
+                                        @else
+                                            <div class="w-full h-24 bg-slate-600 rounded mb-2 flex items-center justify-center">
+                                                <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/></svg>
+                                            </div>
+                                            <div class="text-xs text-red-400 mt-1">Unsupported file type</div>
+                                        @endif
+                                        <div class="text-xs text-gray-400 mt-1">{{ $fileName }}</div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
                     </div>
                     @error('newFiles.*') <span class="text-red-400 text-xs mt-1 block">{{ $message }}</span> @enderror
 
@@ -209,113 +277,39 @@
 <!-- File Review Modal -->
 @if($showReviewModal)
     <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border border-blue-700/30 max-w-md w-full p-6">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl font-bold text-white">File Preview</h2>
-                <button type="button" wire:click="closeReviewModal" class="text-gray-400 hover:text-white transition">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
-            </div>
-
-            <div class="space-y-4">
-                <div class="bg-slate-700/50 rounded-lg p-6 flex items-center justify-center min-h-48">
-                    @if($reviewFileType === 'existing' && isset($existingFiles[$reviewFileIndex]))
-                        @php
-                            $file = $existingFiles[$reviewFileIndex];
-                            $isImage = str_contains($file['file_type'], 'image') || str_ends_with($file['file_path'], '.webp');
-                            $isVideo = str_contains($file['file_type'], 'video');
-                            $isAudio = str_contains($file['file_type'], 'audio');
-                            $isPdf = str_contains($file['file_type'], 'pdf');
-                            $isModel = str_ends_with($file['file_path'], '.glb') || str_ends_with($file['file_path'], '.gltf') || str_ends_with($file['file_path'], '.obj');
-                        @endphp
-                        @if($isImage)
-                            <img src="{{ asset('storage/' . $file['file_path']) }}" class="max-w-full max-h-40 rounded" alt="Preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
-                            <div class="hidden flex-col items-center justify-center">
-                                <svg class="w-16 h-16 text-gray-400 mb-3" fill="currentColor" viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-                                <p class="text-gray-300 font-semibold">{{ basename($file['file_path']) }}</p>
+                    <div x-data="fileDrop" x-init="init()" :class="isDragging ? 'border-blue-500 bg-blue-900/10' : ''"
+                        class="border-2 border-dashed border-blue-700/30 rounded-lg p-4 text-center hover:border-blue-700/50 transition cursor-pointer bg-slate-700/30"
+                        @dragover.prevent.stop="isDragging = true"
+                        @dragleave.prevent.stop="isDragging = false"
+                        @drop.prevent.stop="handleDrop($event)">
+                        <input type="file" wire:model="newFiles" multiple accept="image/*,video/*,audio/*,.pdf,.glb,.gltf,.obj,.svg" style="display:none;" id="file-upload-modal" x-ref="fileInput">
+                        <label for="file-upload-modal" class="cursor-pointer">
+                            <svg class="w-8 h-8 mx-auto mb-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            <p class="text-gray-300 text-sm">Click or drag files here (max 10 files, 50 MB each)</p>
+                        </label>
+                        <script>
+                        document.addEventListener('alpine:init', () => {
+                            Alpine.data('fileDrop', () => ({
+                                isDragging: false,
+                                handleDrop(e) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    this.isDragging = false;
+                                    const files = e.dataTransfer.files;
+                                    if (files.length) {
+                                        try {
+                                            this.$refs.fileInput.files = files;
+                                            this.$refs.fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+                                        } catch (err) {
+                                            this.$refs.fileInput.click();
+                                        }
+                                    }
+                                },
+                                init() {}
+                            }));
+                        });
+                        </script>
                             </div>
-                        @elseif($isVideo)
-                            <div class="text-center">
-                                <svg class="w-16 h-16 mx-auto text-purple-400 mb-3" fill="currentColor" viewBox="0 0 24 24"><path d="M18 3v2h-2V3H8v2H6V3H4v18h16V3h-2zm-2 16H8v-2h8v2z"/><path d="M6 7h12v8H6z" opacity="0.3"/></svg>
-                                <p class="text-gray-300 font-semibold">{{ basename($file['file_path']) }}</p>
-                                <p class="text-gray-400 text-sm mt-1">Video File</p>
-                            </div>
-                        @elseif($isAudio)
-                            <div class="text-center">
-                                <svg class="w-16 h-16 mx-auto text-blue-400 mb-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3v9.28c-.47-.46-1.12-.75-1.84-.75-1.66 0-3 1.34-3 3s1.34 3 3 3c1.66 0 3-1.34 3-3V7h7V3h-8z"/></svg>
-                                <p class="text-gray-300 font-semibold">{{ basename($file['file_path']) }}</p>
-                                <p class="text-gray-400 text-sm mt-1">Audio File</p>
-                            </div>
-                        @elseif($isPdf)
-                            <div class="text-center">
-                                <div class="w-16 h-16 mx-auto mb-3 bg-gradient-to-br from-red-600 to-red-900 rounded-lg flex items-center justify-center">
-                                    <span class="text-white font-bold text-xl">PDF</span>
-                                </div>
-                                <p class="text-gray-300 font-semibold">{{ basename($file['file_path']) }}</p>
-                                <p class="text-gray-400 text-sm mt-1">PDF Document</p>
-                            </div>
-                        @elseif($isModel)
-                            <div class="text-center">
-                                <svg class="w-16 h-16 mx-auto text-cyan-400 mb-3" fill="currentColor" viewBox="0 0 24 24"><path d="M6 2c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L17.5 9H13z" opacity="0.3"/><path d="M9 11h6v2H9zm0 4h6v2H9z"/></svg>
-                                <p class="text-gray-300 font-semibold">{{ basename($file['file_path']) }}</p>
-                                <p class="text-gray-400 text-sm mt-1">3D Model</p>
-                            </div>
-                        @else
-                            <div class="text-center">
-                                <svg class="w-16 h-16 mx-auto text-gray-400 mb-3" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/></svg>
-                                <p class="text-gray-300 font-semibold">{{ basename($file['file_path']) }}</p>
-                            </div>
-                        @endif
-                    @elseif($reviewFileType === 'new' && isset($newFiles[$reviewFileIndex]))
-                        @php
-                            $file = $newFiles[$reviewFileIndex];
-                            $mimeType = $file->getMimeType();
-                            $isImage = str_starts_with($mimeType, 'image/');
-                            $isVideo = str_starts_with($mimeType, 'video/');
-                            $isAudio = str_starts_with($mimeType, 'audio/');
-                            $isPdf = str_contains($mimeType, 'pdf');
-                            $isModel = str_ends_with($file->getClientOriginalName(), '.glb') || str_ends_with($file->getClientOriginalName(), '.gltf') || str_ends_with($file->getClientOriginalName(), '.obj');
-                        @endphp
-                        @if($isImage)
-                            <img src="{{ $file->temporaryUrl() }}" class="max-w-full max-h-40 rounded" alt="Preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
-                            <div class="hidden flex-col items-center justify-center">
-                                <svg class="w-16 h-16 text-gray-400 mb-3" fill="currentColor" viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-                                <p class="text-gray-300 font-semibold">{{ $file->getClientOriginalName() }}</p>
-                            </div>
-                        @elseif($isVideo)
-                            <div class="text-center">
-                                <svg class="w-16 h-16 mx-auto text-purple-400 mb-3" fill="currentColor" viewBox="0 0 24 24"><path d="M18 3v2h-2V3H8v2H6V3H4v18h16V3h-2zm-2 16H8v-2h8v2z"/><path d="M6 7h12v8H6z" opacity="0.3"/></svg>
-                                <p class="text-gray-300 font-semibold">{{ $file->getClientOriginalName() }}</p>
-                                <p class="text-gray-400 text-sm mt-1">{{ number_format($file->getSize() / 1024, 1) }} KB</p>
-                            </div>
-                        @elseif($isAudio)
-                            <div class="text-center">
-                                <svg class="w-16 h-16 mx-auto text-blue-400 mb-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3v9.28c-.47-.46-1.12-.75-1.84-.75-1.66 0-3 1.34-3 3s1.34 3 3 3c1.66 0 3-1.34 3-3V7h7V3h-8z"/></svg>
-                                <p class="text-gray-300 font-semibold">{{ $file->getClientOriginalName() }}</p>
-                                <p class="text-gray-400 text-sm mt-1">{{ number_format($file->getSize() / 1024, 1) }} KB</p>
-                            </div>
-                        @elseif($isPdf)
-                            <div class="text-center">
-                                <div class="w-16 h-16 mx-auto mb-3 bg-gradient-to-br from-red-600 to-red-900 rounded-lg flex items-center justify-center">
-                                    <span class="text-white font-bold text-xl">PDF</span>
-                                </div>
-                                <p class="text-gray-300 font-semibold">{{ $file->getClientOriginalName() }}</p>
-                                <p class="text-gray-400 text-sm mt-1">{{ number_format($file->getSize() / 1024, 1) }} KB</p>
-                            </div>
-                        @elseif($isModel)
-                            <div class="text-center">
-                                <svg class="w-16 h-16 mx-auto text-cyan-400 mb-3" fill="currentColor" viewBox="0 0 24 24"><path d="M6 2c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L17.5 9H13z" opacity="0.3"/><path d="M9 11h6v2H9zm0 4h6v2H9z"/></svg>
-                                <p class="text-gray-300 font-semibold">{{ $file->getClientOriginalName() }}</p>
-                                <p class="text-gray-400 text-sm mt-1">{{ number_format($file->getSize() / 1024, 1) }} KB</p>
-                            </div>
-                        @else
-                            <div class="text-center">
-                                <svg class="w-16 h-16 mx-auto text-gray-400 mb-3" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/></svg>
-                                <p class="text-gray-300 font-semibold">{{ $file->getClientOriginalName() }}</p>
-                                <p class="text-gray-400 text-sm mt-1">{{ number_format($file->getSize() / 1024, 1) }} KB</p>
-                            </div>
-                        @endif
-                    @endif
                 </div>
 
                 <div class="flex gap-3 pt-4">
