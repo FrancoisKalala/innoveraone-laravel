@@ -9,6 +9,11 @@ class Post extends Model
 {
     use HasFactory;
 
+    public function reactions()
+    {
+        return $this->hasMany(PostReaction::class);
+    }
+
     protected $fillable = [
         'user_id',
         'album_id',

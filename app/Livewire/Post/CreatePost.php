@@ -20,6 +20,22 @@ class CreatePost extends Component
     public $albums;
     public $showReviewModal = false;
     public $reviewFileIndex = null;
+    public $showAlbumInput = false;
+    public $newAlbumName = '';
+    public function createAlbum(): void
+    {
+        $this->validate([
+            'newAlbumName' => 'required|string|min:2|max:100',
+        ]);
+        $album = \App\Models\Album::create([
+            'user_id' => auth()->user()->id,
+            'title' => $this->newAlbumName,
+        ]);
+        $this->albums = auth()->user()->albums()->get();
+        $this->album_id = $album->id;
+        $this->newAlbumName = '';
+        $this->showAlbumInput = false;
+    }
 
     public function mount($albumId = null)
     {

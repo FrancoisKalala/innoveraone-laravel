@@ -1,4 +1,20 @@
 <div class="bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-2xl border border-blue-700/20 overflow-hidden hover:border-blue-700/40 transition" wire:key="post-card-{{ $post->id }}">
+    <style>
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .emoji-bounce:hover {
+            animation: bounce 0.4s;
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
     <div class="p-6 border-b border-blue-700/10">
         <div class="flex items-start justify-between mb-4">
             <div class="flex items-center gap-4 flex-1">
@@ -89,7 +105,21 @@
         </div>
     <div class="p-6 space-y-4">
         @if($post->album)<span class="inline-block px-3 py-1 bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-xs font-semibold rounded-full">📁 {{ $post->album->title }}</span>@endif
-        <p class="text-gray-100 text-base leading-relaxed">{{ Str::limit($post->content, 300) }}</p>
+        <p class="text-gray-100 text-base leading-relaxed">
+            {!!
+                preg_replace(
+                    [
+                        '/#([\p{L}0-9_]+)/u',
+                        '/@([\p{L}0-9_]+)/u'
+                    ],
+                    [
+                        '<a href="' . url('/search?tag=$1') . '" class="text-blue-400 hover:underline">#$1</a>',
+                        '<a href="' . url('/profile/$1') . '" class="text-blue-400 hover:underline">@$1</a>'
+                    ],
+                    Str::limit($post->content, 300)
+                )
+            !!}
+        </p>
 
         @if($files->count() > 0)
             <div x-data="{ fileIndex: 0 }" class="mt-4">
@@ -152,10 +182,21 @@
         @if($post->interaction_type !== 'none')
     <div class="px-6 py-4 bg-slate-900/50 border-t border-blue-500/20 flex gap-3">
         @if(in_array($post->interaction_type, ['like', 'like_comment', 'all']))
-        <button wire:click="toggleLike" class="flex-1 py-2 px-4 rounded-lg font-semibold transition flex items-center justify-center gap-2 {{ $isLiked ? 'bg-gradient-to-r from-red-600 to-red-700 text-white' : 'bg-slate-800 text-gray-300 hover:bg-slate-700' }}"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>Like</button>
+        @foreach(['👍','😂','😍','😮'] as $emoji)
+            <button wire:click.prevent="reactEmoji('{{ $emoji }}')"
+                class="px-2 py-1 rounded-full bg-slate-800 text-2xl hover:scale-125 hover:bg-blue-700 transition duration-200 ease-in-out flex items-center gap-1 shadow-lg"
+                style="will-change: transform;"
+                title="React with {{ $emoji }}"
+            >
+                <span class="emoji-bounce">{{ $emoji }}</span>
+                <span class="text-xs text-blue-400 font-bold">{{ $reactions[$emoji] ?? 0 }}</span>
+            </button>
+        @endforeach
         @endif
         @if(in_array($post->interaction_type, ['comment', 'like_comment', 'all']))
-        <button wire:click="toggleComments" class="flex-1 py-2 px-4 rounded-lg font-semibold transition bg-slate-800 text-gray-300 hover:bg-slate-700 flex items-center justify-center gap-2"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>Comment</button>
+        <button wire:click="toggleComments" class="flex-1 py-2 px-4 rounded-lg font-semibold transition bg-slate-800 text-gray-300 hover:bg-slate-700 flex items-center justify-center gap-2" title="Comment">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
+        </button>
         @endif
 
         <!-- Share Button with Dropdown -->
@@ -163,9 +204,9 @@
             <button
                 @click="open = !open"
                 class="w-full py-2 px-4 rounded-lg font-semibold transition bg-slate-800 text-gray-300 hover:bg-slate-700 flex items-center justify-center gap-2"
+                title="Share"
             >
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.15c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.44 9.31 6.77 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.77 0 1.44-.3 1.96-.77l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
-                Share
                 @if($shareCount > 0)
                     <span class="text-xs bg-blue-600 px-2 py-0.5 rounded-full">{{ $shareCount }}</span>
                 @endif
@@ -290,9 +331,35 @@
     @if($showComments)
         <div class="bg-slate-900/50 border-t border-blue-500/20 p-6 space-y-4">
             <h4 class="font-bold text-white mb-4">Comments ({{ $commentCount }})</h4>
+            <div class="flex flex-wrap gap-2 mb-4 items-center">
+                <label class="text-xs text-gray-400">Sort/Filter:</label>
+                <select wire:model="commentView" class="px-2 py-1 rounded bg-slate-800 text-white text-xs border border-blue-700/30">
+                    <option value="all">All (Newest)</option>
+                    <option value="pinned">Pinned</option>
+                    <option value="highlighted">Highlighted</option>
+                    <option value="mine">My Comments</option>
+                    <option value="keyword">Keyword</option>
+                    <option value="most_liked">Most Liked</option>
+                    <option value="most_replied">Most Replied</option>
+                    <option value="oldest">Oldest</option>
+                </select>
+                @if($commentView === 'keyword')
+                    <input wire:model="commentKeyword" type="text" placeholder="Search..." class="px-2 py-1 rounded bg-slate-800 text-white text-xs border border-blue-700/30" />
+                @endif
+            </div>
             @if(in_array($post->interaction_type, ['comment', 'like_comment', 'all']))
                 <form wire:submit.prevent="addComment" class="space-y-2 mb-4">
-                    <textarea wire:model.defer="newComment" rows="3" class="w-full px-4 py-3 rounded-lg bg-slate-800 text-white placeholder-gray-500 border border-blue-700/30 focus:border-blue-700 focus:outline-none transition" placeholder="Add a comment..."></textarea>
+                    <div class="relative">
+                        <textarea id="newCommentContent" wire:model.defer="newComment" rows="3" class="w-full px-4 py-3 rounded-lg bg-slate-800 text-white placeholder-gray-500 border border-blue-700/30 focus:border-blue-700 focus:outline-none transition" placeholder="Add a comment..."></textarea>
+                        <button type="button" class="absolute right-2 top-2 text-xl" onclick="document.getElementById('emoji-picker-new-comment').classList.toggle('hidden')">😊</button>
+                        <div id="emoji-picker-new-comment" class="absolute z-10 bg-slate-800 border border-blue-700/30 rounded-lg p-2 mt-2 hidden" style="max-width: 250px; max-height: 180px; overflow-y: auto;">
+                            <div class="flex flex-wrap gap-1">
+                                @foreach(['😀','😁','😂','🤣','😃','😄','😅','😆','😉','😊','😋','😎','😍','😘','🥰','😗','😙','😚','🙂','🤗','🤩','🤔','🤨','😐','😑','😶','🙄','😏','😣','😥','😮','🤐','😯','😪','😫','🥱','😴','😌','😛','😜','😝','🤤','😒','😓','😔','😕','🙃','🤑','😲','☹️','🙁','😖','😞','😟','😤','😢','😭','😦','😧','😨','😩','🤯','😬','😰','😱','🥵','🥶','😳','🤪','😵','😡','😠','🤬','😷','🤒','🤕','🤢','🤮','🤧','😇','🥳','🥺','🤠','🤡','🤥','🤫','🤭','🧐','🤓','😈','👿','👹','👺','💀','👻','👽','🤖','💩','😺','😸','😹','😻','😼','😽','🙀','😿','😾'] as $emoji)
+                                    <button type="button" class="text-xl p-1 hover:bg-slate-700 rounded" onclick="document.getElementById('newCommentContent').value += '{{ $emoji }}'; document.getElementById('newCommentContent').dispatchEvent(new Event('input'))">{{ $emoji }}</button>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
                     @error('newComment') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                     <div class="flex justify-end">
                         <button type="submit" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-black text-white rounded-lg font-semibold hover:shadow-lg hover:shadow-blue-500/40 transition">Post Comment</button>

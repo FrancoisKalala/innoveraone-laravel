@@ -6,7 +6,41 @@
         <div>
             <form wire:submit.prevent="createPost" class="space-y-4">
         <div><textarea wire:model="content" placeholder="Share your thoughts..." class="w-full px-4 py-3 rounded-lg bg-slate-700 text-white placeholder-gray-500 border border-blue-700/20 focus:border-blue-700 focus:outline-none transition" rows="4"></textarea>@error('content')<span class="text-red-400 text-sm">{{ $message }}</span>@enderror</div>
-        @if(!$albumId)<div><select wire:model="album_id" class="w-full px-4 py-2 rounded-lg bg-slate-700 text-white border border-blue-700/20 focus:border-blue-700 focus:outline-none transition"><option value="">📁 Select an album (optional)</option>@if($albums)@foreach($albums as $album)<option value="{{ $album->id }}">{{ $album->title }}</option>@endforeach @endif</select></div>@endif
+        @if(!$albumId)
+        <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Album (optional)</label>
+            <div class="flex gap-2 items-center">
+                <select wire:model="album_id" class="flex-1 px-4 py-2 rounded-lg bg-slate-700 text-white border border-blue-700/20 focus:border-blue-700 focus:outline-none transition">
+                    <option value="">📁 Select an album (optional)</option>
+                    @if($albums)
+                        @foreach($albums as $album)
+                            <option value="{{ $album->id }}">{{ $album->title }}</option>
+                        @endforeach
+                    @endif
+                </select>
+                <button type="button" class="p-2 bg-gradient-to-br from-blue-500 to-blue-700 text-white rounded-full shadow hover:scale-110 transition duration-150" wire:click="$set('showAlbumInput', true)">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="url(#plusGradient)"/>
+                        <path d="M12 8v8M8 12h8" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                        <defs>
+                            <linearGradient id="plusGradient" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#3b82f6"/>
+                                <stop offset="1" stop-color="#1e40af"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </button>
+            </div>
+            @if($showAlbumInput)
+                <div class="mt-2 flex gap-2">
+                    <input type="text" wire:model.defer="newAlbumName" class="flex-1 px-3 py-2 rounded bg-slate-700 text-white border border-blue-700/20 focus:border-blue-700 focus:outline-none text-sm" placeholder="Album name...">
+                    <button type="button" class="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-xs" wire:click="createAlbum">Create</button>
+                    <button type="button" class="px-3 py-2 bg-slate-600 text-white rounded hover:bg-slate-700 text-xs" wire:click="$set('showAlbumInput', false)">Cancel</button>
+                </div>
+                @error('newAlbumName') <span class="text-red-400 text-xs mt-1 block">{{ $message }}</span> @enderror
+            @endif
+        </div>
+        @endif
         <div><select wire:model="interaction_type" class="w-full px-4 py-2 rounded-lg bg-slate-700 text-white border border-blue-700/20 focus:border-blue-700 focus:outline-none transition text-sm"><option value="all">✨ Allow: All</option><option value="like">👍 Allow: Like</option><option value="comment">💬 Allow: Comment</option><option value="like_comment">👍💬 Allow: Like & Comment</option><option value="none">🔒 No Interactions</option></select></div>
         <div><select wire:model="expiration_hours" class="w-full px-4 py-2 rounded-lg bg-slate-700 text-white border border-blue-700/20 focus:border-blue-700 focus:outline-none transition text-sm"><option value="5">⏱️ Expires in 5 hours</option><option value="10">⏱️ Expires in 10 hours</option><option value="24" selected>⏱️ Expires in 24 hours</option><option value="72">⏱️ Expires in 3 days</option><option value="168">⏱️ Expires in 1 week</option><option value="720">⏱️ Expires in 30 days</option></select></div>
 
@@ -66,34 +100,46 @@
                                 $isAudio = str_starts_with($mimeType, 'audio/');
                                 $isPdf = str_contains($mimeType, 'pdf');
                                 $isModel = str_ends_with($fileName, '.glb') || str_ends_with($fileName, '.gltf') || str_ends_with($fileName, '.obj');
+                                $isSvg = str_ends_with($fileName, '.svg');
                             @endphp
                             @if($isImage)
                                 <img src="{{ $file->temporaryUrl() }}" class="w-full h-24 object-cover rounded mb-2" alt="Media" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
                                 <div class="w-full h-24 bg-slate-600 rounded mb-2 flex items-center justify-center hidden">
                                     <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
                                 </div>
+                                <div class="text-xs text-blue-400 text-center">Image</div>
                             @elseif($isVideo)
                                 <div class="w-full h-24 bg-gradient-to-br from-purple-600 to-purple-900 rounded mb-2 flex items-center justify-center">
                                     <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M18 3v2h-2V3H8v2H6V3H4v18h16V3h-2zm-2 16H8v-2h8v2z"/><path d="M6 7h12v8H6z" opacity="0.3"/></svg>
                                 </div>
+                                <div class="text-xs text-purple-400 text-center">Video</div>
                             @elseif($isAudio)
                                 <div class="w-full h-24 bg-gradient-to-br from-blue-600 to-blue-900 rounded mb-2 flex items-center justify-center">
                                     <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3v9.28c-.47-.46-1.12-.75-1.84-.75-1.66 0-3 1.34-3 3s1.34 3 3 3c1.66 0 3-1.34 3-3V7h7V3h-8z"/></svg>
                                 </div>
+                                <div class="text-xs text-blue-400 text-center">Audio</div>
                             @elseif($isPdf)
                                 <div class="w-full h-24 bg-gradient-to-br from-red-600 to-red-900 rounded mb-2 flex items-center justify-center">
                                     <div class="text-center">
                                         <div class="text-white font-bold text-lg">PDF</div>
                                     </div>
                                 </div>
+                                <div class="text-xs text-red-400 text-center">PDF</div>
                             @elseif($isModel)
                                 <div class="w-full h-24 bg-gradient-to-br from-cyan-600 to-cyan-900 rounded mb-2 flex items-center justify-center">
                                     <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M6 2c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L17.5 9H13z" opacity="0.3"/><path d="M9 11h6v2H9zm0 4h6v2H9z"/></svg>
                                 </div>
+                                <div class="text-xs text-cyan-400 text-center">3D Model</div>
+                            @elseif($isSvg)
+                                <div class="w-full h-24 bg-gradient-to-br from-yellow-500 to-yellow-900 rounded mb-2 flex items-center justify-center">
+                                    <svg class="w-8 h-8 text-yellow-400" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
+                                </div>
+                                <div class="text-xs text-yellow-400 text-center">SVG</div>
                             @else
                                 <div class="w-full h-24 bg-slate-600 rounded mb-2 flex items-center justify-center">
                                     <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/></svg>
                                 </div>
+                                <div class="text-xs text-red-400 text-center">File</div>
                             @endif
                             <p class="text-xs text-gray-300 truncate mb-2">{{ $file->getClientOriginalName() }}</p>
                             <div class="flex gap-1">

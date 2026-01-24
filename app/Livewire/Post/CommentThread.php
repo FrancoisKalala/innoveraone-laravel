@@ -11,25 +11,39 @@ use Livewire\Component;
 class CommentThread extends Component
 {
     public Comment $comment;
+
+    public function togglePin()
+    {
+        // Only post owner can pin/unpin
+        if (auth()->id() === $this->comment->post->user_id) {
+            $this->comment->is_pinned = !$this->comment->is_pinned;
+            $this->comment->save();
+        }
+    }
+
+    public function toggleHighlight()
+    {
+        // Only post owner can highlight/unhighlight
+        if (auth()->id() === $this->comment->post->user_id) {
+            $this->comment->is_highlighted = !$this->comment->is_highlighted;
+            $this->comment->save();
+        }
+    }
     public $replyContent = '';
     public $editContent = '';
-    public $editingReplyId = null;
     public $editingReplyContent = '';
-    public $showReplies = false;
+    public $editingReplyId = null;
     public $replies;
     public $likeCount;
-    public $dislikeCount;
     public $isLiked = false;
-    public $isDisliked = false;
     public $isEditing = false;
     public $isDeleted = false;
+    public $showReplies = false;
 
     public function mount()
     {
-        $this->likeCount = $this->comment->commentLikes()->count();
-        $this->dislikeCount = $this->comment->commentDislikes()->count();
+        $this->likeCount = $this->comment->likes_count;
         $this->isLiked = $this->comment->isCommentLikedBy(auth()->user());
-        $this->isDisliked = $this->comment->isDislikedBy(auth()->user());
         $this->replies = $this->comment->answers()->latest()->get();
     }
 
@@ -41,6 +55,10 @@ class CommentThread extends Component
                 ->delete();
             $this->isLiked = false;
             $this->likeCount--;
+            $this->comment->decrement('likes_count');
+            $this->comment->refresh();
+            $this->likeCount = $this->comment->likes_count;
+            $this->dispatch('commentLikeUpdated', $this->comment->id);
         } else {
             CommentLike::create([
                 'comment_id' => $this->comment->id,
@@ -48,40 +66,10 @@ class CommentThread extends Component
             ]);
             $this->isLiked = true;
             $this->likeCount++;
-
-            if ($this->isDisliked) {
-                $this->comment->commentDislikes()
-                    ->where('user_id', auth()->id())
-                    ->delete();
-                $this->isDisliked = false;
-                $this->dislikeCount--;
-            }
-        }
-    }
-
-    public function toggleDislike()
-    {
-        if ($this->isDisliked) {
-            $this->comment->commentDislikes()
-                ->where('user_id', auth()->id())
-                ->delete();
-            $this->isDisliked = false;
-            $this->dislikeCount--;
-        } else {
-            CommentDislike::create([
-                'comment_id' => $this->comment->id,
-                'user_id' => auth()->id(),
-            ]);
-            $this->isDisliked = true;
-            $this->dislikeCount++;
-
-            if ($this->isLiked) {
-                $this->comment->commentLikes()
-                    ->where('user_id', auth()->id())
-                    ->delete();
-                $this->isLiked = false;
-                $this->likeCount--;
-            }
+            $this->comment->increment('likes_count');
+            $this->comment->refresh();
+            $this->likeCount = $this->comment->likes_count;
+            $this->dispatch('commentLikeUpdated', $this->comment->id);
         }
     }
 

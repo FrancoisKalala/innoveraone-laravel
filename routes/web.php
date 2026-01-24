@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Models\Post;
+use App\Http\Controllers\TagSearchController;
 
 Route::view('/', 'welcome');
 
@@ -63,5 +64,7 @@ Route::get('/posts/{post}/comments', function (Post $post) {
         'comments' => $post->comments()->latest()->paginate(15),
     ]);
 })->middleware(['auth'])->name('posts.comments');
+
+Route::get('/search', [TagSearchController::class, 'index'])->name('search.tag');
 
 require __DIR__.'/auth.php';

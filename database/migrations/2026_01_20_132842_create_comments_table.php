@@ -17,6 +17,8 @@ return new class extends Migration
             $table->foreignId('post_id')->constrained('posts')->onDelete('cascade');
             $table->text('content');
             $table->integer('likes_count')->default(0);
+            $table->boolean('is_pinned')->default(false);
+            $table->boolean('is_highlighted')->default(false);
             $table->timestamps();
             $table->index(['post_id', 'user_id']);
         });

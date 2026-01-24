@@ -26,6 +26,24 @@ class PostCreateModal extends Component
     public $showReviewModal = false;
     public $reviewFileType = null; // 'new' or 'existing'
     public $reviewFileIndex = null;
+    public $showAlbumInput = false;
+    public $newAlbumName = '';
+    public function createAlbum(): void
+    {
+        $this->validate([
+            'newAlbumName' => 'required|string|min:2|max:100',
+        ]);
+        $album = \App\Models\Album::create([
+            'user_id' => auth()->user()->id,
+            'title' => $this->newAlbumName,
+        ]);
+        $this->albums = \App\Models\Album::where('user_id', auth()->user()->id)
+            ->orderBy('title')
+            ->get();
+        $this->albumId = $album->id;
+        $this->newAlbumName = '';
+        $this->showAlbumInput = false;
+    }
 
     protected $listeners = [
         'openPostCreateModal' => 'openCreate',
@@ -34,12 +52,12 @@ class PostCreateModal extends Component
 
     public function openCreate(): void
     {
-        if (!auth()->check()) {
+        if (!auth()->user()) {
             return;
         }
 
         $this->mode = 'create';
-        $this->albums = \App\Models\Album::where('user_id', auth()->id())
+        $this->albums = \App\Models\Album::where('user_id', auth()->user()->id)
             ->orderBy('title')
             ->get();
         $this->show = true;
@@ -49,7 +67,7 @@ class PostCreateModal extends Component
     {
         $post = Post::with('files')->find($postId);
 
-        if (!$post || $post->user_id !== auth()->id()) {
+        if (!$post || $post->user_id !== auth()->user()->id) {
             return;
         }
 
@@ -59,7 +77,7 @@ class PostCreateModal extends Component
         $this->expirationHours = $post->expiration_hours ?? 24;
         $this->interactionType = $post->interaction_type ?? 'all';
         $this->albumId = $post->album_id;
-        $this->albums = \App\Models\Album::where('user_id', auth()->id())
+        $this->albums = \App\Models\Album::where('user_id', auth()->user()->id)
             ->orderBy('title')
             ->get();
         $this->existingFiles = $post->files->toArray();
@@ -105,7 +123,7 @@ class PostCreateModal extends Component
 
     public function save(): void
     {
-        if (!auth()->check()) {
+        if (!auth()->user()) {
             return;
         }
 
@@ -117,7 +135,7 @@ class PostCreateModal extends Component
         ]);
 
         if ($this->mode === 'edit' && $this->post) {
-            if ($this->post->user_id !== auth()->id()) {
+            if ($this->post->user_id !== auth()->user()->id) {
                 return;
             }
 
@@ -145,7 +163,7 @@ class PostCreateModal extends Component
             $this->dispatch('postUpdated', postId: $this->post->id);
         } else {
             $post = Post::create([
-                'user_id' => auth()->id(),
+                'user_id' => auth()->user()->id,
                 'content' => $this->content,
                 'expiration_hours' => $this->expirationHours,
                 'interaction_type' => $this->interactionType,

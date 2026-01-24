@@ -11,6 +11,9 @@ use Livewire\Component;
 
 class PostCard extends Component
 {
+    public $commentView = 'all'; // all, pinned, highlighted, mine, keyword, most_liked, most_replied, oldest
+    public $commentKeyword = '';
+    public $reactions = [];
     public Post $post;
     public $likeCount;
     public $commentCount;
@@ -46,6 +49,36 @@ class PostCard extends Component
         $this->isLiked = $this->post->isLikedBy(auth()->user());
         $this->isFollowing = auth()->check() ? auth()->user()->isFollowing($this->post->user) : false;
         $this->shareCount = $this->post->shares ?? 0;
+        // Load emoji reactions for this post
+        $this->reactions = $this->post->reactions()
+            ->select('emoji')
+            ->selectRaw('count(*) as count')
+            ->groupBy('emoji')
+            ->pluck('count', 'emoji')
+            ->toArray();
+    }
+
+    public function reactEmoji($emoji)
+    {
+        if (!auth()->check()) return;
+        $userId = auth()->id();
+        // Remove previous reaction for this user and post
+        \App\Models\PostReaction::where('post_id', $this->post->id)
+            ->where('user_id', $userId)
+            ->delete();
+        // Add new reaction
+        \App\Models\PostReaction::create([
+            'post_id' => $this->post->id,
+            'user_id' => $userId,
+            'emoji' => $emoji,
+        ]);
+        // Refresh reactions
+        $this->reactions = $this->post->reactions()
+            ->select('emoji')
+            ->selectRaw('count(*) as count')
+            ->groupBy('emoji')
+            ->pluck('count', 'emoji')
+            ->toArray();
     }
 
     public function toggleFollow()
@@ -247,10 +280,35 @@ class PostCard extends Component
 
     public function render()
     {
+        $query = $this->post->comments();
+
+        // Combined filter/sort logic
+        if ($this->commentView === 'pinned') {
+            $query->where('is_pinned', true)->orderByDesc('created_at');
+        } elseif ($this->commentView === 'highlighted') {
+            $query->where('is_highlighted', true)->orderByDesc('created_at');
+        } elseif ($this->commentView === 'mine') {
+            $query->where('user_id', auth()->id())->orderByDesc('created_at');
+        } elseif ($this->commentView === 'keyword' && $this->commentKeyword) {
+            $query->where('content', 'like', '%' . $this->commentKeyword . '%')->orderByDesc('created_at');
+        } elseif ($this->commentView === 'most_liked') {
+            $query->orderByDesc('likes_count');
+        } elseif ($this->commentView === 'most_replied') {
+            $query->withCount('answers')->orderByDesc('answers_count');
+        } elseif ($this->commentView === 'oldest') {
+            $query->orderBy('created_at');
+        } else {
+            $query->orderByDesc('is_pinned')
+                  ->orderByDesc('is_highlighted')
+                  ->orderByDesc('created_at');
+        }
+
+        $comments = $this->showComments ? $query->take(5)->get() : collect();
+
         return view('livewire.post.post-card', [
             'user' => $this->post->user,
             'files' => $this->post->files,
-            'comments' => $this->showComments ? $this->post->comments()->latest()->take(5)->get() : [],
+            'comments' => $comments,
         ]);
     }
 }
