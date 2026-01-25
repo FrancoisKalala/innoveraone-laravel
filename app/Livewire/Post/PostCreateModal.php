@@ -28,6 +28,8 @@ class PostCreateModal extends Component
     public $reviewFileIndex = null;
     public $showAlbumInput = false;
     public $newAlbumName = '';
+    public $showScheduleInput = false;
+    public $publishAt = null;
     public function createAlbum(): void
     {
         $this->validate([
@@ -115,7 +117,7 @@ class PostCreateModal extends Component
 
     public function close(): void
     {
-        $this->reset(['show', 'content', 'expirationHours', 'interactionType', 'albumId', 'albums', 'post', 'mode', 'newFiles', 'existingFiles', 'filesToRemove']);
+        $this->reset(['show', 'content', 'expirationHours', 'interactionType', 'albumId', 'albums', 'post', 'mode', 'newFiles', 'existingFiles', 'filesToRemove', 'showScheduleInput', 'publishAt']);
         $this->expirationHours = 24;
         $this->interactionType = 'all';
         $this->mode = 'create';
@@ -127,12 +129,16 @@ class PostCreateModal extends Component
             return;
         }
 
-        $this->validate([
+        $rules = [
             'content' => 'required|string|min:1|max:5000',
             'expirationHours' => 'nullable|integer|min:1|max:168',
             'interactionType' => 'nullable|string',
             'newFiles.*' => 'nullable|file|max:102400',
-        ]);
+        ];
+        if ($this->showScheduleInput) {
+            $rules['publishAt'] = 'required|date|after:now';
+        }
+        $this->validate($rules);
 
         if ($this->mode === 'edit' && $this->post) {
             if ($this->post->user_id !== auth()->user()->id) {
@@ -144,6 +150,8 @@ class PostCreateModal extends Component
                 'expiration_hours' => $this->expirationHours,
                 'interaction_type' => $this->interactionType,
                 'album_id' => $this->albumId,
+                'status' => $this->showScheduleInput ? 'scheduled' : 'active',
+                'publish_at' => $this->showScheduleInput ? $this->publishAt : null,
             ]);
 
             // Remove marked files
@@ -168,7 +176,8 @@ class PostCreateModal extends Component
                 'expiration_hours' => $this->expirationHours,
                 'interaction_type' => $this->interactionType,
                 'album_id' => $this->albumId,
-                'status' => 'active',
+                'status' => $this->showScheduleInput ? 'scheduled' : 'active',
+                'publish_at' => $this->showScheduleInput ? $this->publishAt : null,
             ]);
 
             $this->uploadFiles($post);

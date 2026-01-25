@@ -22,6 +22,8 @@ class CreatePost extends Component
     public $reviewFileIndex = null;
     public $showAlbumInput = false;
     public $newAlbumName = '';
+    public $showScheduleInput = false;
+    public $publishAt = null;
     public function createAlbum(): void
     {
         $this->validate([
@@ -64,29 +66,34 @@ class CreatePost extends Component
 
     public function createPost()
     {
-        $this->validate([
+        $rules = [
             'content' => 'required|string|min:1|max:5000',
             'album_id' => 'nullable|exists:albums,id',
             'files' => 'nullable|array|max:10',
             'files.*' => 'file|max:51200',
             'expiration_hours' => 'required|integer|min:1|max:720',
             'interaction_type' => 'required|in:like,comment,like_comment,all,none',
-        ]);
+        ];
+        if ($this->showScheduleInput) {
+            $rules['publishAt'] = 'required|date|after:now';
+        }
+        $this->validate($rules);
 
-        $post = auth()->user()->posts()->create([
+        $postData = [
             'content' => $this->content,
             'album_id' => $this->album_id,
             'expiration_hours' => $this->expiration_hours,
             'interaction_type' => $this->interaction_type,
-            'status' => 'published',
-        ]);
+            'status' => $this->showScheduleInput ? 'scheduled' : 'published',
+            'publish_at' => $this->showScheduleInput ? $this->publishAt : null,
+        ];
+
+        $post = auth()->user()->posts()->create($postData);
 
         // Handle file uploads with professional compression
         $compressionService = new FileCompressionService();
         foreach ($this->files as $file) {
-            // Compress file (WebP for images, H.264 for videos, AAC for audio)
             $compressedFile = $compressionService->compress($file);
-
             $path = $compressedFile->store('posts', 'public');
             $post->files()->create([
                 'file_path' => $path,
@@ -94,10 +101,10 @@ class CreatePost extends Component
             ]);
         }
 
-        $this->reset(['content', 'album_id', 'files', 'expiration_hours', 'interaction_type']);
+        $this->reset(['content', 'album_id', 'files', 'expiration_hours', 'interaction_type', 'showScheduleInput', 'publishAt']);
         $this->dispatch('postCreated', postId: $post->id);
         $this->dispatch('close-modal');
-        session()->flash('success', 'Post created successfully!');
+        session()->flash('success', $this->showScheduleInput ? 'Post scheduled successfully!' : 'Post created successfully!');
     }
 
     public function render()

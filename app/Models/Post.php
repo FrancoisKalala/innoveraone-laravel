@@ -24,11 +24,13 @@ class Post extends Model
         'already_expired',
         'already_deleted',
         'shares',
+        'publish_at',
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'publish_at' => 'datetime',
     ];
 
     public function user()

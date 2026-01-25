@@ -3,9 +3,12 @@
 namespace App\Livewire;
 
 use App\Models\User;
+
 use App\Models\Follower;
+use App\Models\Album;
 use Livewire\Component;
 use Livewire\Attributes\On;
+use Illuminate\Support\Facades\Auth;
 
 
 class Explore extends Component
@@ -58,7 +61,7 @@ class Explore extends Component
 
     protected function recentSearchSessionKey(): string
     {
-        $userId = auth()->id();
+        $userId = Auth::id();
         return 'recent_searches_explore_' . ($userId ?: 'guest');
     }
 
@@ -73,17 +76,17 @@ class Explore extends Component
     {
         $user = User::find($userId);
 
-        if (!$user || auth()->id() === $user->id) {
+        if (!$user || Auth::id() === $user->id) {
             return;
         }
 
-        if (auth()->user()->isFollowing($user)) {
-            Follower::where('follower_id', auth()->id())
+        if (Auth::user()->isFollowing($user)) {
+            Follower::where('follower_id', Auth::id())
                 ->where('following_id', $userId)
                 ->delete();
         } else {
             Follower::updateOrCreate([
-                'follower_id' => auth()->id(),
+                'follower_id' => Auth::id(),
                 'following_id' => $userId,
             ]);
         }
@@ -94,7 +97,7 @@ class Explore extends Component
         // Unified search across users and albums
         $searchTerm = trim($this->searchQuery);
 
-        $users = User::where('id', '!=', auth()->id())
+        $users = User::where('id', '!=', Auth::id())
             ->when($searchTerm, fn($query) =>
                 $query->where('name', 'like', "%{$searchTerm}%")
                     ->orWhere('username', 'like', "%{$searchTerm}%")
@@ -103,7 +106,7 @@ class Explore extends Component
             ->limit(12)
             ->get();
 
-        $albums = \App\Models\Album::where('visibility', 'public')
+        $albums = Album::where('visibility', 'public')
             ->when($searchTerm, fn($query) =>
                 $query->where('title', 'like', "%{$searchTerm}%")
                     ->orWhere('description', 'like', "%{$searchTerm}%")
