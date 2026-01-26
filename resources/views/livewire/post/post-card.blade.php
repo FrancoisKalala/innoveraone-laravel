@@ -123,11 +123,11 @@
 
         @if($files->count() > 0)
             <div x-data="{ fileIndex: 0 }" class="mt-4">
-                <div class="relative flex flex-col items-center justify-center">
-                    @php $fileList = $files->values(); @endphp
+                @php $fileList = $files->values(); @endphp
+                <div class="relative flex items-center justify-center w-full">
                     <!-- File Display -->
                     @foreach($fileList as $idx => $file)
-                        <div x-show="fileIndex === {{ $idx }}" x-cloak class="w-full">
+                        <div x-show="fileIndex === {{ $idx }}" x-cloak class="w-full transition-all duration-500 ease-in-out transform" :class="fileIndex === {{ $idx }} ? 'scale-100 opacity-100' : 'scale-95 opacity-0'">
                             @if(str_contains($file->file_type, 'image'))
                                 <img src="{{ asset('storage/' . $file->file_path) }}" alt="Post image" class="w-full h-auto max-h-[600px] object-contain rounded-lg" />
                             @elseif(str_contains($file->file_type, 'video'))
@@ -154,20 +154,42 @@
                     @endforeach
                     <!-- Navigation Arrows -->
                     @if($fileList->count() > 1)
-                        <button @click="fileIndex = Math.max(0, fileIndex - 1)" :disabled="fileIndex === 0" class="absolute left-2 top-1/2 -translate-y-1/2 bg-slate-800/80 text-white rounded-full p-2 shadow hover:bg-blue-700 transition disabled:opacity-50">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                        <!-- Left Arrow -->
+                        <button @click="fileIndex = Math.max(0, fileIndex - 1)" :disabled="fileIndex === 0"
+                            class="absolute left-0 top-1/2 -translate-y-1/2 bg-gradient-to-br from-blue-600/30 to-blue-900/30 text-white rounded-full p-5 md:p-8 shadow-lg hover:scale-110 hover:from-blue-500/50 hover:to-blue-700/50 transition-all duration-300 ease-in-out disabled:opacity-20 disabled:cursor-not-allowed z-20 animate-fade-in"
+                            style="min-width: 56px; min-height: 56px; opacity: 0.5;"
+                            aria-label="Previous file">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                         </button>
-                        <button @click="fileIndex = Math.min({{ $fileList->count() - 1 }}, fileIndex + 1)" :disabled="fileIndex === {{ $fileList->count() - 1 }}" class="absolute right-2 top-1/2 -translate-y-1/2 bg-slate-800/80 text-white rounded-full p-2 shadow hover:bg-blue-700 transition disabled:opacity-50">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        <!-- Right Arrow -->
+                        <button @click="fileIndex = Math.min({{ $fileList->count() - 1 }}, fileIndex + 1)" :disabled="fileIndex === {{ $fileList->count() - 1 }}"
+                            class="absolute right-0 top-1/2 -translate-y-1/2 bg-gradient-to-br from-blue-600/30 to-blue-900/30 text-white rounded-full p-5 md:p-8 shadow-lg hover:scale-110 hover:from-blue-500/50 hover:to-blue-700/50 transition-all duration-300 ease-in-out disabled:opacity-20 disabled:cursor-not-allowed z-20 animate-fade-in"
+                            style="min-width: 56px; min-height: 56px; opacity: 0.5;"
+                            aria-label="Next file">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                         </button>
-                        <!-- Dots -->
-                        <div class="flex justify-center gap-2 mt-4">
-                            <template x-for="i in {{ $fileList->count() }}" :key="i">
-                                <span :class="fileIndex === i - 1 ? 'bg-blue-400 scale-125' : 'bg-gray-400'" class="w-3 h-3 rounded-full inline-block transition-all duration-200 cursor-pointer" @click="fileIndex = i - 1"></span>
-                            </template>
-                        </div>
                     @endif
                 </div>
+                <!-- Dots Indicator: always below the media container -->
+                @if($fileList->count() > 1)
+                    <div class="w-full flex justify-center gap-2 mt-5 animate-fade-in">
+                        <template x-for="i in {{ $fileList->count() }}" :key="i">
+                            <span :class="fileIndex === i - 1 ? 'bg-gradient-to-br from-blue-400 to-cyan-400 scale-125 shadow-lg ring-2 ring-blue-300' : 'bg-gray-400 opacity-60'"
+                                class="w-3 h-3 rounded-full inline-block transition-all duration-300 cursor-pointer border border-white/30 hover:scale-110 hover:shadow-xl"
+                                @click="fileIndex = i - 1"
+                                :style="fileIndex === i - 1 ? 'animation: bounceDot 0.5s;' : ''"
+                            ></span>
+                        </template>
+                    </div>
+                @endif
+                <style>
+                @keyframes bounceDot {
+                    0%, 100% { transform: scale(1); }
+                    50% { transform: scale(1.4); }
+                }
+                .animate-fade-in { animation: fadeIn 0.5s; }
+                @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+                </style>
             </div>
         @endif
         <div class="flex gap-6 text-sm text-gray-400 pt-4 border-t border-blue-500/20">

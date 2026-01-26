@@ -123,14 +123,50 @@
             <!-- Messages -->
             <div class="flex-1 overflow-y-auto space-y-4 mb-4" wire:poll.keep-alive="loadMessages">
                 @forelse($messages as $message)
-                    <div class="flex gap-3 {{ $message->sender_id === auth()->id() ? 'flex-row-reverse' : '' }}">
+                    <div class="flex gap-3 {{ $message->sender_id === auth()->id() ? 'flex-row-reverse' : '' }} group">
                         <div class="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-blue-700 to-black flex items-center justify-center">
                             <span class="text-sm font-bold text-white">{{ substr($message->sender->name ?? 'User', 0, 1) }}</span>
                         </div>
                         <div class="flex-1 {{ $message->sender_id === auth()->id() ? 'text-right' : '' }}">
                             <p class="font-semibold text-white text-sm">{{ $message->sender->name ?? 'User' }}</p>
-                            <div class="mt-1 inline-block max-w-xs px-4 py-2 rounded-lg {{ $message->sender_id === auth()->id() ? 'bg-blue-700/30 text-white/90 border border-blue-700/50' : 'bg-slate-700 text-gray-200' }}">
-                                <p class="text-sm break-words">{{ $message->content }}</p>
+                            <div class="mt-1 inline-block relative">
+                                @if($editingMessageId === $message->id)
+                                    <div class="px-4 py-2 rounded-lg bg-yellow-500/20 border border-yellow-500/50">
+                                        <input type="text" wire:model="editedContent" class="w-full px-2 py-1 bg-slate-700 text-white border border-blue-700/30 rounded text-sm" autofocus>
+                                        <div class="flex gap-2 mt-2">
+                                            <button wire:click="saveEditedMessage" class="px-3 py-1 bg-green-500/30 text-green-400 rounded text-xs hover:bg-green-500/50">Save</button>
+                                            <button wire:click="cancelEditMessage" class="px-3 py-1 bg-red-500/30 text-red-400 rounded text-xs hover:bg-red-500/50">Cancel</button>
+                                        </div>
+                                    </div>
+                                @else
+                                    <div class="px-4 py-2 rounded-lg {{ $message->sender_id === auth()->id() ? 'bg-blue-700/30 text-white/90 border border-blue-700/50' : 'bg-slate-700 text-gray-200' }}">
+                                        <p class="text-sm break-words">{{ $message->content }}</p>
+                                        @if($message->updated_at && $message->updated_at->notEqualTo($message->created_at))
+                                            <p class="text-xs text-gray-400 mt-1">(edited)</p>
+                                        @endif
+                                    </div>
+                                @endif
+
+                                @if($editingMessageId !== $message->id && $message->sender_id === auth()->id())
+                                    <div class="absolute -left-24 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                                        <button wire:click="showMessageDetails({{ $message->id }})" class="p-2 hover:bg-blue-500/20 rounded" title="Message info">
+                                            <svg class="w-4 h-4 text-blue-400 hover:text-blue-300" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                                            </svg>
+                                        </button>
+                                        <button wire:click="startEditMessage({{ $message->id }}, '{{ addslashes($message->content) }}')" class="p-2 hover:bg-yellow-500/20 rounded" title="Edit message">
+                                            <svg class="w-4 h-4 text-yellow-400 hover:text-yellow-300" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z"/>
+                                                <path d="M20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                                            </svg>
+                                        </button>
+                                        <button wire:click="deleteMessage({{ $message->id }})" class="p-2 hover:bg-red-500/20 rounded" title="Delete message">
+                                            <svg class="w-4 h-4 text-red-400 hover:text-red-300" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                @endif
                             </div>
                             <p class="text-xs text-gray-500 mt-1">{{ $message->created_at->diffForHumans() }}</p>
                         </div>
@@ -145,13 +181,66 @@
                 @endforelse
             </div>
 
-            <!-- Message Input -->
-            <form wire:submit="sendMessage" class="flex gap-2 pt-4 border-t border-blue-700/20">
-                <input type="text" wire:model.live="messageContent" placeholder="Type a message..." class="flex-1 px-4 py-2 rounded-lg bg-slate-700 text-white placeholder-gray-500 border border-blue-700/20 focus:border-blue-700 focus:outline-none transition">
+            <!-- Message Input with Emoji Picker -->
+            <form wire:submit="sendMessage" class="flex gap-2 pt-4 border-t border-blue-700/20 relative">
+                <input id="messageInput" type="text" wire:model.live="messageContent" placeholder="Type a message..." class="flex-1 px-4 py-2 rounded-lg bg-slate-700 text-white placeholder-gray-500 border border-blue-700/20 focus:border-blue-700 focus:outline-none transition">
+                <button id="emojiBtn" type="button" class="px-2 py-2 bg-slate-700 text-yellow-400 rounded-lg hover:bg-slate-600 transition" title="Add emoji">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 22c5.52 0 10-4.48 10-10S17.52 2 12 2 2 6.48 2 12s4.48 10 10 10zm0-2c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-4-5c.2-2.67 5.33-2.67 5.53 0H8zm6.5-3c.83 0 1.5-.67 1.5-1.5S15.33 9 14.5 9s-1.5.67-1.5 1.5S13.67 14 14.5 14zm-5 0c.83 0 1.5-.67 1.5-1.5S10.33 9 9.5 9 8 9.67 8 10.5 8.67 14 9.5 14z"/></svg>
+                </button>
+                <div id="emojiPickerContainer" class="absolute bottom-14 left-0 z-50"></div>
                 <button type="submit" class="px-6 py-2 bg-gradient-to-r from-blue-700 to-black text-white rounded-lg font-semibold hover:shadow-lg transition">
                     Send
                 </button>
             </form>
+            <!-- Emoji Mart v2 CDN -->
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/emoji-mart@2.11.2/css/emoji-mart.css">
+            <script src="https://cdn.jsdelivr.net/npm/emoji-mart@2.11.2/dist/emoji-mart.js"></script>
+            <script>
+                function attachEmojiPicker() {
+                    var emojiBtn = document.getElementById('emojiBtn');
+                    if (!emojiBtn) return;
+                    // Remove previous listeners
+                    emojiBtn.onclick = null;
+                    emojiBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        var pickerContainer = document.getElementById('emojiPickerContainer');
+                        if (!window.EmojiMart || !window.EmojiMart.Picker) {
+                            alert('Emoji picker failed to load.');
+                            return;
+                        }
+                        if (pickerContainer.childElementCount > 0) {
+                            pickerContainer.innerHTML = '';
+                            return;
+                        }
+                        var picker = window.EmojiMart.Picker({
+                            set: 'apple',
+                            onClick: function(emoji) {
+                                var input = document.getElementById('messageInput');
+                                input.value += emoji.native;
+                                input.dispatchEvent(new Event('input', { bubbles: true }));
+                            }
+                        });
+                        pickerContainer.appendChild(picker);
+                    });
+                }
+                function closeEmojiPickerOnClickOutside(e) {
+                    var pickerContainer = document.getElementById('emojiPickerContainer');
+                    var emojiBtn = document.getElementById('emojiBtn');
+                    if (pickerContainer && pickerContainer.childElementCount > 0 && !pickerContainer.contains(e.target) && e.target !== emojiBtn) {
+                        pickerContainer.innerHTML = '';
+                    }
+                }
+                document.addEventListener('DOMContentLoaded', function() {
+                    attachEmojiPicker();
+                });
+                document.addEventListener('livewire:load', function() {
+                    setTimeout(attachEmojiPicker, 100);
+                });
+                document.addEventListener('livewire:navigated', function() {
+                    setTimeout(attachEmojiPicker, 100);
+                });
+                document.addEventListener('click', closeEmojiPickerOnClickOutside);
+            </script>
         @else
             <div class="flex items-center justify-center h-full">
                 <div class="text-center">
@@ -191,6 +280,42 @@
                             Cancel
                         </button>
                     </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- Message Info Modal -->
+    @if($showMessageInfo)
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+            <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border border-blue-700/20 p-8 max-w-md w-full mx-4">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-white">Message Details</h2>
+                    <button wire:click="closeMessageInfo" class="text-gray-400 hover:text-white">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <p class="text-xs text-gray-400 uppercase">Sent by</p>
+                        <p class="text-white font-semibold">{{ $infoMessageDetails['sender'] ?? 'Unknown' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 uppercase">Message</p>
+                        <p class="text-white bg-slate-700/50 p-3 rounded-lg break-words">{{ $infoMessageDetails['content'] ?? '' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 uppercase">Sent</p>
+                        <p class="text-white">{{ $infoMessageDetails['created_at'] ?? '' }}</p>
+                    </div>
+                    @if($infoMessageDetails['is_edited'] ?? false)
+                        <div>
+                            <p class="text-xs text-gray-400 uppercase">Edited</p>
+                            <p class="text-white">{{ $infoMessageDetails['updated_at'] ?? '' }}</p>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

@@ -29,7 +29,7 @@ Route::view('/contacts', 'pages.contacts')
     ->middleware(['auth'])
     ->name('contacts');
 
-Route::get('/followers-manager', \App\Livewire\Profile\FollowersManager::class)
+Route::view('/followers-manager', 'pages.followers-manager')
     ->middleware(['auth'])
     ->name('followers-manager');
 
@@ -49,7 +49,7 @@ Route::view('/albums', 'pages.albums')
     ->middleware(['auth'])
     ->name('albums');
 
-Route::get('/explore', \App\Livewire\Explore::class)
+Route::view('/explore', 'pages.explore')
     ->middleware(['auth'])
     ->name('explore');
 

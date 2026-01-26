@@ -9,11 +9,11 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
-<body class="font-sans antialiased">
-    <livewire:layout.sidebar />
-    <div class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black pb-32">
-        <main class="flex-1 overflow-y-auto max-w-7xl mx-auto px-4 py-6 mb-8">
-            {{ $slot }}
+<body class="bg-slate-900 font-sans antialiased">
+    <div class="flex pb-32">
+        <livewire:layout.sidebar />
+        <main class="flex-1 overflow-auto mb-8">
+            @livewire('explore')
         </main>
     </div>
     @livewireScripts

@@ -1,15 +1,20 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-white leading-tight">
-            {{ __('Expired Posts') }}
-        </h2>
-    </x-slot>
-
-    <livewire:layout.sidebar />
-
-    <div class="py-12 pb-32">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{{ config('app.name', 'Laravel') }} - Expired Posts</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @livewireStyles
+</head>
+<body class="bg-slate-900 font-sans antialiased">
+    <div class="flex pb-32">
+        <livewire:layout.sidebar />
+        <main class="flex-1 overflow-auto mb-8">
             @livewire('post.expired-posts')
-        </div>
+        </main>
     </div>
-</x-app-layout>
+    @livewireScripts
+</body>
+</html>

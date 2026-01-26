@@ -11,6 +11,9 @@ class ExpiredPosts extends Component
 {
     use WithPagination;
 
+    public $showDeleteModal = false;
+    public $postToDelete = null;
+
     public function restorePost($postId)
     {
         $post = Post::where('id', $postId)
@@ -27,9 +30,21 @@ class ExpiredPosts extends Component
         session()->flash('success', 'Post restored successfully');
     }
 
-    public function permanentlyDelete($postId)
+    public function openDeleteModal($postId)
     {
-        $post = Post::where('id', $postId)
+        $this->postToDelete = $postId;
+        $this->showDeleteModal = true;
+    }
+
+    public function closeDeleteModal()
+    {
+        $this->showDeleteModal = false;
+        $this->postToDelete = null;
+    }
+
+    public function permanentlyDelete()
+    {
+        $post = Post::where('id', $this->postToDelete)
             ->where('user_id', auth()->id())
             ->first();
 
@@ -38,12 +53,13 @@ class ExpiredPosts extends Component
         }
 
         // Delete associated expired post record
-        ExpiredPost::where('post_id', $postId)->delete();
+        ExpiredPost::where('post_id', $this->postToDelete)->delete();
 
         // Delete the post
         $post->delete();
 
         session()->flash('success', 'Post permanently deleted');
+        $this->closeDeleteModal();
     }
 
     public function render()
@@ -56,6 +72,8 @@ class ExpiredPosts extends Component
 
         return view('livewire.post.expired-posts', [
             'expiredPosts' => $expiredPosts,
+            'showDeleteModal' => $this->showDeleteModal,
+            'postToDelete' => $this->postToDelete,
         ]);
     }
 }

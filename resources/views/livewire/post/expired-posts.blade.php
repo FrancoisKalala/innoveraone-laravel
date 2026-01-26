@@ -57,16 +57,14 @@
 
                     <!-- Actions -->
                     <div class="px-6 py-4 bg-slate-900/50 border-t border-red-500/20 flex gap-3">
-                        <button wire:click="restorePost({{ $post->id }})" 
-                                onclick="return confirm('Restore this post?')"
+                        <button wire:click="restorePost({{ $post->id }})"
                                 class="flex-1 py-2 px-4 rounded-lg font-semibold transition bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:shadow-lg flex items-center justify-center gap-2">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>
                             </svg>
                             Restore
                         </button>
-                        <button wire:click="permanentlyDelete({{ $post->id }})" 
-                                onclick="return confirm('Permanently delete this post? This action cannot be undone!')"
+                        <button wire:click="openDeleteModal({{ $post->id }})"
                                 class="flex-1 py-2 px-4 rounded-lg font-semibold transition bg-red-500/20 text-red-400 border border-red-500/50 hover:bg-red-500/30 flex items-center justify-center gap-2">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
@@ -87,6 +85,23 @@
             <div class="text-6xl mb-4">🗑️</div>
             <h3 class="text-2xl font-bold text-white mb-2">No Expired Posts</h3>
             <p class="text-gray-400">Your deleted posts will appear here</p>
+        </div>
+    @endif
+
+    <!-- Delete Forever Modal -->
+    @if($showDeleteModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border border-red-700/30 max-w-md w-full p-6">
+                <h2 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                    <svg class="w-6 h-6 text-red-400" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                    Delete Expired Post
+                </h2>
+                <p class="text-gray-300 mb-6">Are you sure you want to permanently delete this expired post? This action cannot be undone.</p>
+                <div class="flex gap-3">
+                    <button wire:click="permanentlyDelete" class="flex-1 px-4 py-2 font-semibold text-white transition rounded-lg bg-gradient-to-r from-red-600 to-black hover:shadow-lg hover:shadow-red-500/50">Delete Forever</button>
+                    <button wire:click="closeDeleteModal" class="flex-1 px-4 py-2 font-semibold text-white transition rounded-lg bg-slate-700 hover:bg-slate-800">Cancel</button>
+                </div>
+            </div>
         </div>
     @endif
 </div>

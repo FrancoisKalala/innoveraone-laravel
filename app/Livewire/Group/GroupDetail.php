@@ -10,7 +10,7 @@ use Livewire\Component;
 class GroupDetail extends Component
 {
     public $selectedGroup = null;
-    protected $messages = [];
+    public $messages = [];
     public $newMessage = '';
     public $showCreateModal = false;
     public $groupName = '';
