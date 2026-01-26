@@ -141,48 +141,66 @@
             </div>
         </div>
 
-        <!-- Posts Display with Infinite Scroll -->
-        <div x-data="{ observer: null, loading: false }" x-init="
-            observer = new IntersectionObserver(
-                entries => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting && !loading && $wire.hasMore) {
-                            loading = true;
-                            $wire.loadMore().then(() => { loading = false; });
-                        }
-                    });
-                },
-                { threshold: 0.1 }
-            );
-            $watch('$wire.offset', () => {
-                setTimeout(() => {
-                    const sentinel = document.getElementById('infinite-scroll-sentinel');
-                    if (sentinel) observer.observe(sentinel);
-                }, 100);
-            });
-        " class="mt-8 mb-8">
-            @forelse($posts as $post)
-                <div class="mb-6">
-                    @livewire('post.post-card', ['post' => $post], key($post->id))
+        <!-- Posts Display -->
+        @if($filterType === 'mine')
+            <div class="mt-8 mb-8 space-y-12">
+                <!-- Published Posts -->
+                <div id="published-posts-section">
+                    @livewire('post.published-posts')
                 </div>
-            @empty
-                <div class="text-center py-20">
-                    <div class="w-16 h-16 bg-gradient-to-br from-blue-700 to-black rounded-full mx-auto mb-4 opacity-20"></div>
-                    <p class="text-gray-400 text-lg">No posts yet. Be the first to share!</p>
+                <!-- Scheduled Posts -->
+                <div id="scheduled-posts-section">
+                    @livewire('post.scheduled-posts')
                 </div>
-            @endforelse
-
-            <!-- Infinite Scroll Sentinel -->
-            <div id="infinite-scroll-sentinel" class="py-8 text-center">
-                @if($hasMore)
-                    <div class="flex items-center justify-center gap-2">
-                        <div class="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
-                        <div class="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style="animation-delay: 0.1s;"></div>
-                        <div class="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style="animation-delay: 0.2s;"></div>
-                    </div>
-                @endif
+                <!-- Expired Posts -->
+                <div id="expired-posts-section">
+                    @livewire('post.expired-posts')
+                </div>
             </div>
-        </div>
+        @else
+            <!-- Default Infinite Scroll Feed for other tabs -->
+            <div x-data="{ observer: null, loading: false }" x-init="
+                observer = new IntersectionObserver(
+                    entries => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting && !loading && $wire.hasMore) {
+                                loading = true;
+                                $wire.loadMore().then(() => { loading = false; });
+                            }
+                        });
+                    },
+                    { threshold: 0.1 }
+                );
+                $watch('$wire.offset', () => {
+                    setTimeout(() => {
+                        const sentinel = document.getElementById('infinite-scroll-sentinel');
+                        if (sentinel) observer.observe(sentinel);
+                    }, 100);
+                });
+            " class="mt-8 mb-8">
+                @forelse($posts as $post)
+                    <div class="mb-6">
+                        @livewire('post.post-card', ['post' => $post], key($post->id))
+                    </div>
+                @empty
+                    <div class="text-center py-20">
+                        <div class="w-16 h-16 bg-gradient-to-br from-blue-700 to-black rounded-full mx-auto mb-4 opacity-20"></div>
+                        <p class="text-gray-400 text-lg">No posts yet. Be the first to share!</p>
+                    </div>
+                @endforelse
+
+                <!-- Infinite Scroll Sentinel -->
+                <div id="infinite-scroll-sentinel" class="py-8 text-center">
+                    @if($hasMore)
+                        <div class="flex items-center justify-center gap-2">
+                            <div class="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
+                            <div class="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style="animation-delay: 0.1s;"></div>
+                            <div class="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style="animation-delay: 0.2s;"></div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        @endif
     </div>
 </div>
 

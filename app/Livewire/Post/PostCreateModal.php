@@ -84,6 +84,14 @@ class PostCreateModal extends Component
             ->get();
         $this->existingFiles = $post->files->toArray();
         $this->filesToRemove = [];
+        // Populate publishAt and showScheduleInput if editing a scheduled post
+        if ($post->publish_at) {
+            $this->publishAt = $post->publish_at->format('Y-m-d\TH:i');
+            $this->showScheduleInput = true;
+        } else {
+            $this->publishAt = null;
+            $this->showScheduleInput = false;
+        }
         $this->show = true;
     }
 

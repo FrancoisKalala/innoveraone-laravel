@@ -181,13 +181,66 @@
                 @endforelse
             </div>
 
-            <!-- Message Input -->
-            <form wire:submit="sendMessage" class="flex gap-2 pt-4 border-t border-blue-700/20">
-                <input type="text" wire:model.live="messageContent" placeholder="Type a message..." class="flex-1 px-4 py-2 rounded-lg bg-slate-700 text-white placeholder-gray-500 border border-blue-700/20 focus:border-blue-700 focus:outline-none transition">
+            <!-- Message Input with Emoji Picker -->
+            <form wire:submit="sendMessage" class="flex gap-2 pt-4 border-t border-blue-700/20 relative">
+                <input id="messageInput" type="text" wire:model.live="messageContent" placeholder="Type a message..." class="flex-1 px-4 py-2 rounded-lg bg-slate-700 text-white placeholder-gray-500 border border-blue-700/20 focus:border-blue-700 focus:outline-none transition">
+                <button id="emojiBtn" type="button" class="px-2 py-2 bg-slate-700 text-yellow-400 rounded-lg hover:bg-slate-600 transition" title="Add emoji">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 22c5.52 0 10-4.48 10-10S17.52 2 12 2 2 6.48 2 12s4.48 10 10 10zm0-2c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-4-5c.2-2.67 5.33-2.67 5.53 0H8zm6.5-3c.83 0 1.5-.67 1.5-1.5S15.33 9 14.5 9s-1.5.67-1.5 1.5S13.67 14 14.5 14zm-5 0c.83 0 1.5-.67 1.5-1.5S10.33 9 9.5 9 8 9.67 8 10.5 8.67 14 9.5 14z"/></svg>
+                </button>
+                <div id="emojiPickerContainer" class="absolute bottom-14 left-0 z-50"></div>
                 <button type="submit" class="px-6 py-2 bg-gradient-to-r from-blue-700 to-black text-white rounded-lg font-semibold hover:shadow-lg transition">
                     Send
                 </button>
             </form>
+            <!-- Emoji Mart v2 CDN -->
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/emoji-mart@2.11.2/css/emoji-mart.css">
+            <script src="https://cdn.jsdelivr.net/npm/emoji-mart@2.11.2/dist/emoji-mart.js"></script>
+            <script>
+                function attachEmojiPicker() {
+                    var emojiBtn = document.getElementById('emojiBtn');
+                    if (!emojiBtn) return;
+                    // Remove previous listeners
+                    emojiBtn.onclick = null;
+                    emojiBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        var pickerContainer = document.getElementById('emojiPickerContainer');
+                        if (!window.EmojiMart || !window.EmojiMart.Picker) {
+                            alert('Emoji picker failed to load.');
+                            return;
+                        }
+                        if (pickerContainer.childElementCount > 0) {
+                            pickerContainer.innerHTML = '';
+                            return;
+                        }
+                        var picker = window.EmojiMart.Picker({
+                            set: 'apple',
+                            onClick: function(emoji) {
+                                var input = document.getElementById('messageInput');
+                                input.value += emoji.native;
+                                input.dispatchEvent(new Event('input', { bubbles: true }));
+                            }
+                        });
+                        pickerContainer.appendChild(picker);
+                    });
+                }
+                function closeEmojiPickerOnClickOutside(e) {
+                    var pickerContainer = document.getElementById('emojiPickerContainer');
+                    var emojiBtn = document.getElementById('emojiBtn');
+                    if (pickerContainer && pickerContainer.childElementCount > 0 && !pickerContainer.contains(e.target) && e.target !== emojiBtn) {
+                        pickerContainer.innerHTML = '';
+                    }
+                }
+                document.addEventListener('DOMContentLoaded', function() {
+                    attachEmojiPicker();
+                });
+                document.addEventListener('livewire:load', function() {
+                    setTimeout(attachEmojiPicker, 100);
+                });
+                document.addEventListener('livewire:navigated', function() {
+                    setTimeout(attachEmojiPicker, 100);
+                });
+                document.addEventListener('click', closeEmojiPickerOnClickOutside);
+            </script>
         @else
             <div class="flex items-center justify-center h-full">
                 <div class="text-center">
