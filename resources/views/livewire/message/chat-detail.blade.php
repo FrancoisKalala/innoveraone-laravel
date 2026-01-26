@@ -123,14 +123,50 @@
             <!-- Messages -->
             <div class="flex-1 overflow-y-auto space-y-4 mb-4" wire:poll.keep-alive="loadMessages">
                 @forelse($messages as $message)
-                    <div class="flex gap-3 {{ $message->sender_id === auth()->id() ? 'flex-row-reverse' : '' }}">
+                    <div class="flex gap-3 {{ $message->sender_id === auth()->id() ? 'flex-row-reverse' : '' }} group">
                         <div class="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-blue-700 to-black flex items-center justify-center">
                             <span class="text-sm font-bold text-white">{{ substr($message->sender->name ?? 'User', 0, 1) }}</span>
                         </div>
                         <div class="flex-1 {{ $message->sender_id === auth()->id() ? 'text-right' : '' }}">
                             <p class="font-semibold text-white text-sm">{{ $message->sender->name ?? 'User' }}</p>
-                            <div class="mt-1 inline-block max-w-xs px-4 py-2 rounded-lg {{ $message->sender_id === auth()->id() ? 'bg-blue-700/30 text-white/90 border border-blue-700/50' : 'bg-slate-700 text-gray-200' }}">
-                                <p class="text-sm break-words">{{ $message->content }}</p>
+                            <div class="mt-1 inline-block relative">
+                                @if($editingMessageId === $message->id)
+                                    <div class="px-4 py-2 rounded-lg bg-yellow-500/20 border border-yellow-500/50">
+                                        <input type="text" wire:model="editedContent" class="w-full px-2 py-1 bg-slate-700 text-white border border-blue-700/30 rounded text-sm" autofocus>
+                                        <div class="flex gap-2 mt-2">
+                                            <button wire:click="saveEditedMessage" class="px-3 py-1 bg-green-500/30 text-green-400 rounded text-xs hover:bg-green-500/50">Save</button>
+                                            <button wire:click="cancelEditMessage" class="px-3 py-1 bg-red-500/30 text-red-400 rounded text-xs hover:bg-red-500/50">Cancel</button>
+                                        </div>
+                                    </div>
+                                @else
+                                    <div class="px-4 py-2 rounded-lg {{ $message->sender_id === auth()->id() ? 'bg-blue-700/30 text-white/90 border border-blue-700/50' : 'bg-slate-700 text-gray-200' }}">
+                                        <p class="text-sm break-words">{{ $message->content }}</p>
+                                        @if($message->updated_at && $message->updated_at->notEqualTo($message->created_at))
+                                            <p class="text-xs text-gray-400 mt-1">(edited)</p>
+                                        @endif
+                                    </div>
+                                @endif
+
+                                @if($editingMessageId !== $message->id && $message->sender_id === auth()->id())
+                                    <div class="absolute -left-24 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                                        <button wire:click="showMessageDetails({{ $message->id }})" class="p-2 hover:bg-blue-500/20 rounded" title="Message info">
+                                            <svg class="w-4 h-4 text-blue-400 hover:text-blue-300" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                                            </svg>
+                                        </button>
+                                        <button wire:click="startEditMessage({{ $message->id }}, '{{ addslashes($message->content) }}')" class="p-2 hover:bg-yellow-500/20 rounded" title="Edit message">
+                                            <svg class="w-4 h-4 text-yellow-400 hover:text-yellow-300" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z"/>
+                                                <path d="M20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                                            </svg>
+                                        </button>
+                                        <button wire:click="deleteMessage({{ $message->id }})" class="p-2 hover:bg-red-500/20 rounded" title="Delete message">
+                                            <svg class="w-4 h-4 text-red-400 hover:text-red-300" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                @endif
                             </div>
                             <p class="text-xs text-gray-500 mt-1">{{ $message->created_at->diffForHumans() }}</p>
                         </div>
@@ -191,6 +227,42 @@
                             Cancel
                         </button>
                     </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- Message Info Modal -->
+    @if($showMessageInfo)
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+            <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border border-blue-700/20 p-8 max-w-md w-full mx-4">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-white">Message Details</h2>
+                    <button wire:click="closeMessageInfo" class="text-gray-400 hover:text-white">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <p class="text-xs text-gray-400 uppercase">Sent by</p>
+                        <p class="text-white font-semibold">{{ $infoMessageDetails['sender'] ?? 'Unknown' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 uppercase">Message</p>
+                        <p class="text-white bg-slate-700/50 p-3 rounded-lg break-words">{{ $infoMessageDetails['content'] ?? '' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 uppercase">Sent</p>
+                        <p class="text-white">{{ $infoMessageDetails['created_at'] ?? '' }}</p>
+                    </div>
+                    @if($infoMessageDetails['is_edited'] ?? false)
+                        <div>
+                            <p class="text-xs text-gray-400 uppercase">Edited</p>
+                            <p class="text-white">{{ $infoMessageDetails['updated_at'] ?? '' }}</p>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

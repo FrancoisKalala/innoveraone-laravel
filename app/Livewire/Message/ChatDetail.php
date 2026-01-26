@@ -7,9 +7,69 @@ use App\Models\MessageConversation;
 use App\Models\User;
 use Livewire\Component;
 use Livewire\Attributes\On;
+use Illuminate\Support\Facades\Auth;
 
 class ChatDetail extends Component
 {
+    public $editingMessageId = null;
+    public $editedContent = '';
+    public $showMessageInfo = null;
+    public $infoMessageDetails = [];
+
+    public function startEditMessage($messageId, $content)
+    {
+        $message = Message::find($messageId);
+        if (!$message || (Auth::check() && Auth::id() !== $message->sender_id)) {
+            return;
+        }
+        $this->editingMessageId = $messageId;
+        $this->editedContent = $content;
+    }
+
+    public function cancelEditMessage()
+    {
+        $this->editingMessageId = null;
+        $this->editedContent = '';
+    }
+
+    public function saveEditedMessage()
+    {
+        if (empty(trim($this->editedContent)) || !$this->editingMessageId) {
+            return;
+        }
+        $message = Message::find($this->editingMessageId);
+        if (!$message || (Auth::check() && Auth::id() !== $message->sender_id)) {
+            return;
+        }
+        $message->update([
+            'content' => $this->editedContent,
+        ]);
+        $this->cancelEditMessage();
+        $this->loadMessages();
+    }
+
+    public function showMessageDetails($messageId)
+    {
+        $message = Message::find($messageId);
+        if (!$message) {
+            return;
+        }
+        $this->showMessageInfo = $messageId;
+        $this->infoMessageDetails = [
+            'id' => $message->id,
+            'sender' => $message->sender->name ?? '',
+            'content' => $message->content,
+            'created_at' => $message->created_at->format('M d, Y - H:i:s'),
+            'updated_at' => $message->updated_at->format('M d, Y - H:i:s'),
+            'is_edited' => $message->updated_at && $message->updated_at->notEqualTo($message->created_at),
+        ];
+    }
+
+    public function closeMessageInfo()
+    {
+        $this->showMessageInfo = null;
+        $this->infoMessageDetails = [];
+    }
     public $conversations = [];
     public $selectedConversationId = null;
     public $selectedConversation = null;
@@ -64,7 +124,7 @@ class ChatDetail extends Component
 
     protected function recentSearchSessionKey(): string
     {
-        $userId = auth()->id();
+        $userId = Auth::id();
         return 'recent_searches_messages_' . ($userId ?: 'guest');
     }
 
@@ -76,7 +136,7 @@ class ChatDetail extends Component
 
     public function loadConversations()
     {
-        $userId = auth()->id();
+        $userId = Auth::id();
 
         // Get all conversations for the user (messages they sent or received)
         $query = Message::where(function($query) use ($userId) {
@@ -135,7 +195,7 @@ class ChatDetail extends Component
             $query->where('name', 'like', '%' . $this->recipientSearch . '%')
                   ->orWhere('username', 'like', '%' . $this->recipientSearch . '%');
         })
-        ->where('id', '!=', auth()->id())
+        ->where('id', '!=', Auth::id())
         ->limit(10)
         ->get();
     }
@@ -154,7 +214,7 @@ class ChatDetail extends Component
             return;
         }
 
-        $userId = auth()->id();
+        $userId = Auth::id();
         $conversationId = $this->selectedConversationId;
 
         // Get messages between current user and selected contact
@@ -184,7 +244,7 @@ class ChatDetail extends Component
         }
 
         Message::create([
-            'sender_id' => auth()->id(),
+            'sender_id' => Auth::id(),
             'receiver_id' => $this->selectedConversationId,
             'content' => $this->messageContent,
         ]);
@@ -210,7 +270,7 @@ class ChatDetail extends Component
     public function loadAvailableContacts()
     {
         // Load contacts that user can message
-        $this->availableContacts = User::where('id', '!=', auth()->id())
+        $this->availableContacts = User::where('id', '!=', Auth::id())
             ->limit(10)
             ->get();
     }
@@ -232,7 +292,19 @@ class ChatDetail extends Component
     public function deleteMessage($messageId)
     {
         Message::findOrFail($messageId)->delete();
+        if ($this->editingMessageId === $messageId) {
+            $this->cancelEditMessage();
+        }
+        if ($this->showMessageInfo === $messageId) {
+            $this->closeMessageInfo();
+        }
         $this->loadMessages();
+        $this->loadConversations();
+        // If no messages remain, reset selected conversation to avoid 404
+        if ($this->messages->isEmpty()) {
+            $this->selectedConversationId = null;
+            $this->selectedConversation = null;
+        }
     }
 
     public function render()
