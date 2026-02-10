@@ -19,7 +19,7 @@
                                 <h3 class="font-bold text-white text-lg">{{ $post->user->name }}</h3>
                                 <p class="text-sm text-gray-400">Scheduled for {{ $post->publish_at->format('M d, Y H:i') }}</p>
                                 @if($post->album)
-                                    <span class="inline-block mt-1 px-2 py-0.5 bg-blue-500/20 text-blue-300 text-xs rounded">📁 {{ $post->album->title }}</span>
+                                    <a href="{{ route('album.posts', $post->album->id) }}" class="inline-block mt-1 px-2 py-0.5 bg-blue-500/20 text-blue-300 text-xs rounded hover:bg-blue-700/80 transition" title="View posts in album">📁 {{ $post->album->title }}</a>
                                 @endif
                             </div>
                         </div>

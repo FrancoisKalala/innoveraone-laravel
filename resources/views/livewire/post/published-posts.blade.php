@@ -11,7 +11,7 @@
     @if($publishedPosts->count() > 0)
         <div class="space-y-6">
             @foreach($publishedPosts as $post)
-                @livewire('post.post-card', ['post' => $post], key('published-'.$post->id))
+                @livewire('post.post-card', ['post' => $post], key('published-'.$post->id.'-'.request('page', 1)))
             @endforeach
         </div>
         <div class="mt-8">

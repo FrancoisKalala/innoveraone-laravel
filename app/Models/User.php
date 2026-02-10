@@ -176,5 +176,24 @@ class User extends Authenticatable
             ->where('following_id', $user->id)
             ->exists();
     }
+
+        /**
+     * Get mutual followers between this user and the authenticated user.
+     * Returns a collection of User models.
+     */
+    public function mutualFollowers()
+    {
+        $authUser = auth()->user();
+        if (!$authUser) return collect();
+
+        // Get IDs of users this user is following
+        $thisFollowingIds = $this->following()->pluck('following_id')->toArray();
+        // Get IDs of users the auth user is following
+        $authFollowingIds = $authUser->following()->pluck('following_id')->toArray();
+
+        // Find intersection
+        $mutualIds = array_intersect($thisFollowingIds, $authFollowingIds);
+        return User::whereIn('id', $mutualIds)->get();
+    }
 }
 

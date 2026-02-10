@@ -1,5 +1,5 @@
 <div class="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
-    <div class="px-4 py-8 mx-auto max-w-3xl" x-data="{ showCreatePost: false }" @close-modal.window="showCreatePost = false">
+    <div class="max-w-3xl px-4 py-8 mx-auto" x-data="{ showCreatePost: false }" @close-modal.window="showCreatePost = false">
         <!-- Create Post Modal -->
         <div x-show="showCreatePost"
              x-transition:enter="transition ease-out duration-300"
@@ -13,11 +13,11 @@
             <div @click="showCreatePost = false" class="fixed inset-0 bg-black/50 backdrop-blur-sm"></div>
             <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border border-blue-700/30 max-w-4xl w-full p-6 relative z-10 max-h-[90vh] overflow-y-auto">
                 <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                    <h2 class="flex items-center gap-2 text-xl font-bold text-white">
                         <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
                         Create New Post
                     </h2>
-                    <button @click="showCreatePost = false" class="text-gray-400 hover:text-white transition">
+                    <button @click="showCreatePost = false" class="text-gray-400 transition hover:text-white">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
@@ -28,7 +28,7 @@
         </div>
 
         <!-- Filter Tabs with Search State -->
-        <div x-data="{ searchExpanded: false, showRecent: false }" @click.away="showRecent = false" class="sticky top-0 z-40 bg-gradient-to-r from-slate-900/95 to-black/95 border-b border-blue-700/20 backdrop-blur">
+        <div x-data="{ searchExpanded: false, showRecent: false }" @click.away="showRecent = false" class="sticky top-0 z-40 border-b bg-gradient-to-r from-slate-900/95 to-black/95 border-blue-700/20 backdrop-blur">
             <div class="flex items-center justify-between gap-2 px-4 py-4">
                 <div class="flex gap-2 overflow-x-auto">
                     <button wire:click="setFilter('all')" class="px-6 py-3 font-semibold {{ $filterType === 'all' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-white' }} transition whitespace-nowrap">
@@ -58,7 +58,7 @@
                 </div>
 
                 <!-- Search Icon Button -->
-                <button type="button" @click="searchExpanded = !searchExpanded; searchExpanded && $nextTick(() => $refs.feedSearch.focus())" class="flex items-center justify-center w-9 h-9 rounded-full bg-slate-700 text-blue-300 hover:bg-slate-600 hover:scale-110 transition shrink-0" aria-label="Toggle search">
+                <button type="button" @click="searchExpanded = !searchExpanded; searchExpanded && $nextTick(() => $refs.feedSearch.focus())" class="flex items-center justify-center text-blue-300 transition rounded-full w-9 h-9 bg-slate-700 hover:bg-slate-600 hover:scale-110 shrink-0" aria-label="Toggle search">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
@@ -68,8 +68,8 @@
             <!-- Collapsible Search Bar -->
             <div x-show="searchExpanded" x-transition:enter="transition-all duration-300 ease-out" x-transition:enter-start="opacity-0 -translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition-all duration-200 ease-in" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-4" class="overflow-hidden border-b border-blue-700/20" style="display: none;">
                 <div class="px-4 pb-4">
-                    <div class="flex items-center gap-3 px-4 py-3 rounded-xl border border-slate-600/50 bg-slate-800/70">
-                        <button type="button" @click="showRecent = !showRecent; $refs.feedSearch.focus();" class="flex items-center justify-center w-9 h-9 rounded-full bg-slate-700 text-blue-300 hover:bg-slate-600 transition" aria-label="Toggle recent searches">
+                    <div class="flex items-center gap-3 px-4 py-3 border rounded-xl border-slate-600/50 bg-slate-800/70">
+                        <button type="button" @click="showRecent = !showRecent; $refs.feedSearch.focus();" class="flex items-center justify-center text-blue-300 transition rounded-full w-9 h-9 bg-slate-700 hover:bg-slate-600" aria-label="Toggle recent searches">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                             </svg>
@@ -80,16 +80,16 @@
                             type="text"
                             wire:model.live.debounce.500ms="search"
                             placeholder="Search posts, users, albums..."
-                            class="flex-1 px-3 py-2 text-sm text-white placeholder-gray-400 bg-slate-900/40 rounded-xl border border-transparent focus:border-blue-500 focus:outline-none transition"
+                            class="flex-1 px-3 py-2 text-sm text-white placeholder-gray-400 transition border border-transparent bg-slate-900/40 rounded-xl focus:border-blue-500 focus:outline-none"
                         >
                         <button
                             wire:click="setSearchType('all')"
-                            class="hidden sm:inline-flex items-center px-3 py-2 text-xs font-semibold rounded-lg bg-slate-900/60 text-gray-300 hover:text-white hover:bg-slate-800 transition"
+                            class="items-center hidden px-3 py-2 text-xs font-semibold text-gray-300 transition rounded-lg sm:inline-flex bg-slate-900/60 hover:text-white hover:bg-slate-800"
                         >All</button>
                         @if($search)
                             <button
                                 wire:click="$set('search', '')"
-                                class="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-slate-700 transition"
+                                class="p-2 text-gray-400 transition rounded-lg hover:text-white hover:bg-slate-700"
                             >
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                             </button>
@@ -97,7 +97,7 @@
                         <button
                             type="button"
                             @click="searchExpanded = false"
-                            class="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-slate-700 transition"
+                            class="p-2 text-gray-400 transition rounded-lg hover:text-white hover:bg-slate-700"
                             aria-label="Close search"
                         >
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -123,7 +123,7 @@
                                         type="button"
                                         wire:click="useRecentSearch({{ $index }})"
                                         @click="showRecent = false"
-                                        class="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-slate-800/70 hover:bg-slate-700/70 text-sm text-gray-100 transition"
+                                        class="flex items-center justify-between w-full px-3 py-2 text-sm text-gray-100 transition rounded-lg bg-slate-800/70 hover:bg-slate-700/70"
                                     >
                                         <div class="flex items-center gap-2">
                                             <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-4.35-4.35M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16z"/></svg>
@@ -183,9 +183,9 @@
                         @livewire('post.post-card', ['post' => $post], key($post->id))
                     </div>
                 @empty
-                    <div class="text-center py-20">
-                        <div class="w-16 h-16 bg-gradient-to-br from-blue-700 to-black rounded-full mx-auto mb-4 opacity-20"></div>
-                        <p class="text-gray-400 text-lg">No posts yet. Be the first to share!</p>
+                    <div class="py-20 text-center">
+                        <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-700 to-black opacity-20"></div>
+                        <p class="text-lg text-gray-400">No posts yet. Be the first to share!</p>
                     </div>
                 @endforelse
 
@@ -203,7 +203,5 @@
         @endif
     </div>
 </div>
-
-@livewire('post.post-create-modal')
 
 

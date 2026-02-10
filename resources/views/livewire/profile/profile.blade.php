@@ -60,8 +60,8 @@
             </div>
         </div>
     </div>
-    <!-- Recent Posts -->
-    <div class="max-w-4xl mx-auto mt-10">
+    <!-- Content -->
+    <div class="max-w-4xl mx-auto mt-8">
         <h3 class="flex items-center gap-2 mb-4 text-xl font-bold text-white">
             <svg class="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
             Recent Posts
@@ -74,7 +74,6 @@
                 <div class="text-gray-400">No posts yet.</div>
             @endif
         </div>
+        <div class="mb-32"></div>
     </div>
-    <div class="mb-32"></div>
 </div>
-

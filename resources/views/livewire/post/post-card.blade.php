@@ -1,4 +1,4 @@
-<div class="bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-2xl border border-blue-700/20 overflow-hidden hover:border-blue-700/40 transition" wire:key="post-card-{{ $post->id }}">
+<div class="bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-2xl border border-blue-700/20 overflow-hidden hover:border-blue-700/40 transition shadow-2xl backdrop-blur-xl" wire:key="post-card-{{ $post->id }}">
     <style>
         @keyframes bounce {
             0%, 100% { transform: translateY(0); }
@@ -19,16 +19,22 @@
         <div class="flex items-start justify-between mb-4">
             <div class="flex items-center gap-4 flex-1">
                 <!-- Avatar with Explore Design Style -->
-                <div class="flex-shrink-0 w-20 h-20 rounded-full bg-gradient-to-br from-blue-700 to-black flex items-center justify-center ring-4 ring-blue-500/50 group-hover:ring-blue-500 transition shadow-lg cursor-pointer">
+                <a href="{{ route('user.profile', $user->id) }}" class="flex items-center justify-center rounded-full shadow-lg w-14 h-14 bg-gradient-to-br from-blue-700 to-black hover:scale-105 transition">
                     <span class="text-3xl font-bold text-white">{{ substr($user->name, 0, 1) }}</span>
-                </div>
+                </a>
                 <div class="flex-1">
                     <h3 class="font-bold text-white text-lg group-hover:text-blue-400 transition">{{ $user->name }}</h3>
                     <p class="text-sm text-gray-400">{{ '@' . ($user->username ?? strtolower(str_replace(' ', '', $user->name))) }} • {{ $post->created_at->diffForHumans() }}</p>
                     @if($post->user_id !== auth()->id())
-                        <button wire:click="toggleFollow" class="mt-2 px-3 py-1 rounded-full text-xs font-semibold {{ $isFollowing ? 'bg-slate-700 text-white border border-blue-500/40' : 'bg-blue-600 text-white border border-blue-500/60' }} hover:opacity-90 transition">
-                            {{ $isFollowing ? 'Following' : 'Follow' }}
-                        </button>
+                                @if($isFollowing)
+                                    <button wire:click="toggleFollow" class="mt-2 px-3 py-1 rounded-full text-xs font-semibold text-purple-400 border border-purple-400 bg-transparent hover:bg-purple-700 hover:text-white transition">
+                                        Unfollow
+                                    </button>
+                                @else
+                                    <button wire:click="toggleFollow" class="mt-2 px-3 py-1 rounded-full text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow">
+                                        Follow
+                                    </button>
+                                @endif
                     @endif
                 </div>
             </div>
@@ -76,7 +82,7 @@
                         style="display: none;"
                     >
                         <div class="text-xs font-semibold text-gray-400 mb-2 px-2">Forward to contacts</div>
-                        <div class="space-y-1 max-h-96 overflow-y-auto">
+                        <div class="space-y-1 max-h-96 overflow-y-auto" style="scrollbar-width: thin; scrollbar-color: rgba(168, 85, 247, 0.5) transparent;">
                             @php
                                 $contacts = auth()->user()->contacts()->wherePivot('is_deleted', false)->get();
                             @endphp
@@ -104,7 +110,11 @@
             </div>
         </div>
     <div class="p-6 space-y-4">
-        @if($post->album)<span class="inline-block px-3 py-1 bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-xs font-semibold rounded-full">📁 {{ $post->album->title }}</span>@endif
+        @if($post->album)
+            <a href="{{ route('album.posts', $post->album->id) }}" class="inline-block px-3 py-1 bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-xs font-semibold rounded-full hover:bg-blue-700/80 transition" title="View posts in album">
+                📁 {{ $post->album->title }}
+            </a>
+        @endif
         <p class="text-gray-100 text-base leading-relaxed">
             {!!
                 preg_replace(
@@ -122,7 +132,7 @@
         </p>
 
         @if($files->count() > 0)
-            <div x-data="{ fileIndex: 0 }" class="mt-4">
+            <div x-data="() => ({ fileIndex: 0 })" class="mt-4">
                 @php $fileList = $files->values(); @endphp
                 <div class="relative flex items-center justify-center w-full">
                     <!-- File Display -->
@@ -217,7 +227,7 @@
         @endif
         @if(in_array($post->interaction_type, ['comment', 'like_comment', 'all']))
         <button wire:click="toggleComments" class="flex-1 py-2 px-4 rounded-lg font-semibold transition bg-slate-800 text-gray-300 hover:bg-slate-700 flex items-center justify-center gap-2" title="Comment">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
         </button>
         @endif
 
@@ -256,7 +266,7 @@
                     class="w-full flex items-center gap-3 px-3 py-2 rounded hover:bg-slate-700 transition text-left"
                 >
                     <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
                     </div>
                     <div class="flex-1">
                         <div class="text-sm font-semibold text-white">Copy Link</div>
@@ -351,7 +361,7 @@
         </div>
     @endif
     @if($showComments)
-        <div class="bg-slate-900/50 border-t border-blue-500/20 p-6 space-y-4">
+            <div class="bg-slate-900/50 border-t border-blue-500/20 p-6 space-y-4 overflow-y-auto" style="scrollbar-width: thin; scrollbar-color: rgba(168, 85, 247, 0.5) transparent;">
             <h4 class="font-bold text-white mb-4">Comments ({{ $commentCount }})</h4>
             <div class="flex flex-wrap gap-2 mb-4 items-center">
                 <label class="text-xs text-gray-400">Sort/Filter:</label>
