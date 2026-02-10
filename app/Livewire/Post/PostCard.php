@@ -8,6 +8,7 @@ use App\Models\Comment;
 use App\Models\ExpiredPost;
 use App\Models\Follower;
 use Livewire\Component;
+use Illuminate\Support\Facades\Auth;
 
 class PostCard extends Component
 {
@@ -26,6 +27,7 @@ class PostCard extends Component
     public $showShareOptions = false;
     public $shareMessage = '';
     public $showForwardOptions = false;
+    public $viewed = false;
 
     protected $listeners = ['commentDeleted' => 'handleCommentDeleted'];
 
@@ -35,19 +37,19 @@ class PostCard extends Component
             return false;
         }
 
-        $blockedByCreator = auth()->user()->blockedByUsers()
+        $blockedByCreator = Auth::user()->blockedByUsers()
             ->where('blocked_user_id', $this->post->user_id)
             ->exists();
 
-        return !$blockedByCreator && auth()->check();
+        return !$blockedByCreator && Auth::check();
     }
 
     public function mount()
     {
         $this->likeCount = $this->post->likes()->count();
         $this->commentCount = $this->post->comments()->count();
-        $this->isLiked = $this->post->isLikedBy(auth()->user());
-        $this->isFollowing = auth()->check() ? auth()->user()->isFollowing($this->post->user) : false;
+        $this->isLiked = $this->post->isLikedBy(Auth::user());
+        $this->isFollowing = Auth::check() ? Auth::user()->isFollowing($this->post->user) : false;
         $this->shareCount = $this->post->shares ?? 0;
         // Load emoji reactions for this post
         $this->reactions = $this->post->reactions()
@@ -60,8 +62,8 @@ class PostCard extends Component
 
     public function reactEmoji($emoji)
     {
-        if (!auth()->check()) return;
-        $userId = auth()->id();
+        if (!Auth::check()) return;
+        $userId = Auth::id();
         // Remove previous reaction for this user and post
         \App\Models\PostReaction::where('post_id', $this->post->id)
             ->where('user_id', $userId)
@@ -83,18 +85,18 @@ class PostCard extends Component
 
     public function toggleFollow()
     {
-        if (!auth()->check() || $this->post->user_id === auth()->id()) {
+        if (!Auth::check() || $this->post->user_id === Auth::id()) {
             return;
         }
 
         if ($this->isFollowing) {
-            Follower::where('follower_id', auth()->id())
+            Follower::where('follower_id', Auth::id())
                 ->where('following_id', $this->post->user_id)
                 ->delete();
             $this->isFollowing = false;
         } else {
             Follower::updateOrCreate([
-                'follower_id' => auth()->id(),
+                'follower_id' => Auth::id(),
                 'following_id' => $this->post->user_id,
             ]);
             $this->isFollowing = true;
@@ -108,12 +110,12 @@ class PostCard extends Component
         }
 
         if ($this->isLiked) {
-            $this->post->likes()->where('user_id', auth()->id())->delete();
+            $this->post->likes()->where('user_id', Auth::id())->delete();
             $this->isLiked = false;
             $this->likeCount--;
         } else {
             Like::create([
-                'user_id' => auth()->id(),
+                'user_id' => Auth::id(),
                 'likeable_type' => Post::class,
                 'likeable_id' => $this->post->id,
             ]);
@@ -141,7 +143,7 @@ class PostCard extends Component
 
         Comment::create([
             'post_id' => $this->post->id,
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'content' => $this->newComment,
         ]);
 
@@ -152,7 +154,7 @@ class PostCard extends Component
 
     public function openEditModal()
     {
-        if ($this->post->user_id !== auth()->id()) {
+        if ($this->post->user_id !== Auth::id()) {
             return;
         }
 
@@ -162,7 +164,7 @@ class PostCard extends Component
 
     public function openDeleteModal()
     {
-        if ($this->post->user_id !== auth()->id()) {
+        if ($this->post->user_id !== Auth::id()) {
             return;
         }
 
@@ -171,7 +173,7 @@ class PostCard extends Component
 
     public function toggleForwardOptions()
     {
-        if (!auth()->check()) {
+        if (!Auth::check()) {
             return;
         }
 
@@ -180,18 +182,18 @@ class PostCard extends Component
 
     public function forwardToContact($contactId)
     {
-        if (!auth()->check()) {
+        if (!Auth::check()) {
             return;
         }
 
-        $contact = auth()->user()->contacts()->find($contactId);
+        $contact = Auth::user()->contacts()->find($contactId);
         if (!$contact) {
             return;
         }
 
         // Create message with forwarded post
         \App\Models\Message::create([
-            'sender_id' => auth()->id(),
+            'sender_id' => Auth::id(),
             'recipient_id' => $contact->id,
             'content' => 'Forwarded a post',
             'is_forwarded_post' => true,
@@ -209,7 +211,7 @@ class PostCard extends Component
 
     public function deletePost()
     {
-        if ($this->post->user_id !== auth()->id()) {
+        if ($this->post->user_id !== Auth::id()) {
             return;
         }
 
@@ -248,11 +250,13 @@ class PostCard extends Component
         $this->shareCount++;
 
         // Log share activity
-        activity()
-            ->performedOn($this->post)
-            ->causedBy(auth()->user())
-            ->withProperties(['method' => $method])
-            ->log('shared');
+        if (function_exists('activity')) {
+            activity()
+                ->performedOn($this->post)
+                ->causedBy(Auth::user())
+                ->withProperties(['method' => $method])
+                ->log('shared');
+        }
 
         // Set success message based on method
         $messages = [
@@ -288,7 +292,7 @@ class PostCard extends Component
         } elseif ($this->commentView === 'highlighted') {
             $query->where('is_highlighted', true)->orderByDesc('created_at');
         } elseif ($this->commentView === 'mine') {
-            $query->where('user_id', auth()->id())->orderByDesc('created_at');
+            $query->where('user_id', Auth::id())->orderByDesc('created_at');
         } elseif ($this->commentView === 'keyword' && $this->commentKeyword) {
             $query->where('content', 'like', '%' . $this->commentKeyword . '%')->orderByDesc('created_at');
         } elseif ($this->commentView === 'most_liked') {
@@ -309,6 +313,7 @@ class PostCard extends Component
             'user' => $this->post->user,
             'files' => $this->post->files,
             'comments' => $comments,
+            'viewed' => $this->viewed,
         ]);
     }
 }

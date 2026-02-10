@@ -12,6 +12,7 @@ class AlbumFavorite extends Model
     protected $fillable = [
         'album_id',
         'user_id',
+        'favorited_at',
     ];
 
     protected $casts = [

@@ -27,7 +27,7 @@
     </style>
 </head>
 <body class="antialiased">
-    <div class="min-h-screen bg    <div class="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 via-30% via-blue-900 via-60% to-slate-900 text-white overflow-hidden relative">
+    <div class="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 via-30% via-blue-900 via-60% to-slate-900 text-white overflow-hidden relative">
         <!-- Animated Background Blobs -->
         <div class="absolute inset-0 overflow-hidden pointer-events-none">
             <div class="blob absolute top-0 -left-4 w-96 h-96 bg-blue-700 rounded-full mix-blend-multiply filter blur-3xl opacity-15"></div>

@@ -54,6 +54,8 @@
                             </a>
                         @endif
                         <a href="{{ route('user.posts', $user->id) }}" class="px-6 py-2 font-semibold text-white transition rounded-full shadow bg-gradient-to-r from-blue-700 to-purple-700 hover:from-blue-800 hover:to-purple-800">View Posts</a>
+                        <a href="{{ route('expired-posts') }}" class="px-6 py-2 font-semibold text-white transition rounded-full shadow bg-gradient-to-r from-gray-700 to-red-700 hover:from-gray-800 hover:to-red-800">View Expired Posts</a>
+                        <a href="{{ route('scheduled-posts') }}" class="px-6 py-2 font-semibold text-white transition rounded-full shadow bg-gradient-to-r from-blue-400 to-green-600 hover:from-blue-500 hover:to-green-700">View Scheduled Posts</a>
                     </div>
                     <div class="flex gap-4 mt-4 text-xs text-gray-400">
                         <span class="flex items-center gap-1"><svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Joined {{ $user->created_at->format('M Y') }}</span>
@@ -114,4 +116,3 @@
         </div>
     </div>
 </div>
-

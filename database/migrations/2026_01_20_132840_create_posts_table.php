@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('album_id')->nullable()->constrained('albums')->onDelete('cascade'); // posts belong to albums (publications)
             $table->text('content');
             $table->string('status', 50)->default('published'); // published, draft, deleted
+            $table->timestamp('publish_at')->nullable();
             $table->integer('likes_count')->default(0);
             $table->integer('comments_count')->default(0);
             $table->timestamps();

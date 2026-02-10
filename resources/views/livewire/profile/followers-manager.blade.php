@@ -50,13 +50,13 @@
                                 $user = $followerRel->follower;
                             @endphp
                             @if ($user)
-                                <div class="overflow-hidden transition border bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl border-blue-700/20 hover:border-blue-700/40">
+                                <div class="overflow-hidden transition border bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl border-blue-700/20 hover:border-blue-700/40 shadow-2xl backdrop-blur-xl">
                                     <div class="p-6">
                                         <!-- User Avatar -->
                                         <div class="flex items-center justify-center mb-4">
-                                            <div class="flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-blue-700 to-black ring-4 ring-blue-500/30">
+                                            <a href="{{ route('user.profile', $user->id) }}" class="flex items-center justify-center rounded-full shadow-lg w-14 h-14 bg-gradient-to-br from-blue-700 to-black hover:scale-105 transition">
                                                 <span class="text-3xl font-bold text-white">{{ substr($user->name, 0, 1) }}</span>
-                                            </div>
+                                            </a>
                                         </div>
 
                                         <!-- User Info -->
@@ -116,7 +116,7 @@
                                         <button
                                             type="button"
                                             wire:click="toggleFollow({{ $user->id }})"
-                                            class="w-full px-4 py-2 font-semibold text-white transition rounded-lg {{ !auth()->user()->isFollowing($user) ? 'bg-gradient-to-r from-green-600 to-green-700 hover:shadow-lg hover:shadow-green-500/40' : 'text-gray-400 bg-gray-600/20 hover:bg-gray-600/30 border border-gray-500/30' }}"
+                                            class="w-full px-4 py-2 font-semibold transition rounded-lg text-gray-400 bg-gray-600/20 hover:bg-gray-600/30 border border-gray-500/30"
                                         >
                                             {{ auth()->user()->isFollowing($user) ? 'Unfollow' : 'Follow' }}
                                         </button>
@@ -159,13 +159,13 @@
                                 $followsBack = auth()->user()->followers()->where('follower_id', $user->id)->exists();
                             @endphp
                             @if ($user)
-                                <div class="overflow-hidden transition border bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl border-purple-700/20 hover:border-purple-700/40">
+                                <div class="overflow-hidden transition border bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl border-purple-700/20 hover:border-purple-700/40 shadow-2xl backdrop-blur-xl">
                                     <div class="p-6">
                                         <!-- User Avatar -->
                                         <div class="flex items-center justify-center mb-4">
-                                            <div class="flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-purple-700 to-black ring-4 ring-purple-500/30">
+                                            <a href="{{ route('user.posts', $user->id) }}" class="flex items-center justify-center rounded-full shadow-lg w-14 h-14 bg-gradient-to-br from-purple-700 to-black hover:scale-105 transition">
                                                 <span class="text-3xl font-bold text-white">{{ substr($user->name, 0, 1) }}</span>
-                                            </div>
+                                            </a>
                                         </div>
 
                                         <!-- User Info -->
@@ -201,7 +201,7 @@
                                         <button
                                             type="button"
                                             wire:click="toggleFollow({{ $user->id }})"
-                                            class="w-full px-4 py-2 font-semibold text-white transition rounded-lg text-gray-400 bg-gray-600/20 hover:bg-gray-600/30 border border-gray-500/30"
+                                            class="w-full px-4 py-2 font-semibold transition rounded-lg text-gray-400 bg-gray-600/20 hover:bg-gray-600/30 border border-gray-500/30"
                                         >
                                             Unfollow
                                         </button>

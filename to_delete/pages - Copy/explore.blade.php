@@ -9,10 +9,10 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
-<body class="bg-slate-900 font-sans antialiased">
+<body class="font-sans antialiased bg-slate-900">
     <div class="flex pb-32">
         <livewire:layout.sidebar />
-        <main class="flex-1 overflow-auto mb-8">
+        <main class="flex-1 mb-8 overflow-auto border shadow-2xl backdrop-blur-xl rounded-2xl border-blue-700/20" style="scrollbar-width: thin; scrollbar-color: rgba(168, 85, 247, 0.5) transparent;">
             @livewire('explore')
         </main>
     </div>

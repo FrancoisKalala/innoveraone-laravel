@@ -60,13 +60,19 @@ class Album extends Model
     // View tracking
     public function views()
     {
-        return $this->hasMany(AlbumView::class, 'album_id');
+        return $this->hasMany(AlbumView::class, 'album_id'); // AlbumView now points to album_post_views
     }
 
     // Favorites
     public function favorites()
     {
         return $this->hasMany(AlbumFavorite::class, 'album_id');
+    }
+
+    // Album post views
+    public function postViews()
+    {
+        return $this->hasMany(AlbumPostView::class, 'album_id');
     }
 
     // Check if user can view this album

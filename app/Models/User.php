@@ -45,6 +45,13 @@ class User extends Authenticatable
         return $this->hasMany(Album::class);
     }
 
+
+    // Album post views
+    public function albumPostViews()
+    {
+        return $this->hasMany(AlbumPostView::class);
+    }
+
     // Legacy method for backward compatibility
     public function chapters()
     {
@@ -175,6 +182,25 @@ class User extends Authenticatable
         return $this->following()
             ->where('following_id', $user->id)
             ->exists();
+    }
+
+        /**
+     * Get mutual followers between this user and the authenticated user.
+     * Returns a collection of User models.
+     */
+    public function mutualFollowers()
+    {
+        $authUser = auth()->user();
+        if (!$authUser) return collect();
+
+        // Get IDs of users this user is following
+        $thisFollowingIds = $this->following()->pluck('following_id')->toArray();
+        // Get IDs of users the auth user is following
+        $authFollowingIds = $authUser->following()->pluck('following_id')->toArray();
+
+        // Find intersection
+        $mutualIds = array_intersect($thisFollowingIds, $authFollowingIds);
+        return User::whereIn('id', $mutualIds)->get();
     }
 }
 

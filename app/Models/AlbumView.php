@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AlbumView extends Model
 {
-    protected $table = 'album_views';
+    protected $table = 'album_post_views';
 
     protected $fillable = [
         'album_id',

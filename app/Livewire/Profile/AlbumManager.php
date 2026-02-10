@@ -20,9 +20,21 @@ class AlbumManager extends Component
         $this->loadAlbums();
     }
 
+    public $unviewedCounts = [];
+
     public function loadAlbums()
     {
-        $this->albums = auth()->user()->albums()->paginate(20);
+        $this->albums = auth()->user()->albums()->with('posts')->paginate(20);
+        $this->unviewedCounts = [];
+        $userId = auth()->id();
+        foreach ($this->albums as $album) {
+            $postIds = $album->posts->pluck('id');
+            $viewedPostIds = \DB::table('album_post_views')
+                ->where('album_id', $album->id)
+                ->where('user_id', $userId)
+                ->pluck('post_id');
+            $this->unviewedCounts[$album->id] = $postIds->diff($viewedPostIds)->count();
+        }
     }
 
     public function uploadProfilePhoto()

@@ -3,7 +3,9 @@
         <p class="text-sm text-gray-400">Comment removed.</p>
     @else
     <div class="flex items-start gap-3">
-        <img src="{{ $comment->user->profile_photo_path ? asset('storage/' . $comment->user->profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($comment->user->name) . '&background=8b5cf6&color=fff' }}" alt="{{ $comment->user->name }}" class="w-10 h-10 rounded-full object-cover flex-shrink-0">
+        <a href="{{ route('user.profile', $comment->user->id) }}">
+            <img src="{{ $comment->user->profile_photo_path ? asset('storage/' . $comment->user->profile_photo_path) : 'https://ui-avatars.com/api/?name=' . urlencode($comment->user->name) . '&background=8b5cf6&color=fff' }}" alt="{{ $comment->user->name }}" class="w-10 h-10 rounded-full object-cover flex-shrink-0 hover:scale-105 transition">
+        </a>
         <div class="flex-1">
             <div class="flex items-center gap-2 mb-2">
                 <h4 class="font-bold text-white text-sm">{{ $comment->user->name }}</h4>
@@ -31,7 +33,7 @@
                         <button type="button" id="emoji-btn-edit-{{ $comment->id }}" class="absolute right-2 top-2 text-xl transition-transform duration-300" onclick="const picker = document.getElementById('emoji-picker-edit-{{ $comment->id }}'); picker.classList.toggle('hidden'); this.classList.toggle('scale-125'); this.classList.toggle('rotate-12');">😊</button>
                         <div id="emoji-picker-edit-{{ $comment->id }}" class="absolute right-2 top-10 z-[9999] bg-slate-800 border border-blue-700/30 rounded-lg p-2 mt-2 hidden shadow-xl" style="max-width: 250px; max-height: 180px; overflow-y: auto;">
                             <div class="flex flex-wrap gap-1">
-                                @foreach(['😀','😁','😂','🤣','😃','😄','😅','😆','😉','😊','😋','😎','😍','😘','🥰','😗','😙','😚','🙂','🤗','🤩','🤔','🤨','😐','😑','😶','🙄','😏','😣','😥','😮','🤐','😯','😪','😫','🥱','😴','😌','😛','😜','😝','🤤','😒','😓','😔','😕','🙃','🤑','😲','☹️','🙁','😖','😞','😟','😤','😢','😭','😦','😧','😨','😩','🤯','😬','😰','😱','🥵','🥶','😳','🤪','😵','😡','😠','🤬','😷','🤒','🤕','🤢','🤮','🤧','😇','🥳','🥺','🤠','🤡','🤥','🤫','🤭','🧐','🤓','😈','👿','👹','👺','💀','👻','👽','🤖','💩','😺','😸','😹','😻','😼','😽','🙀','😿','😾'] as $emoji)
+                                @foreach(['😀','😁','😂','🤣','😃','😄','😅','😆','😉','😊','😋','😎','😍','😘','🥰','😗','😙','😚','🙂','🤗','🤩','🤔','🤨','😐','😑','😶','🙄','😏','😣','😥','😮','🤐','😯','😪','😫','🥱','😴','😌','😛','😜','😝','🤤','😒','😓','😔','😕','🙃','🤑','😲','☹️','🙁','😖','😞','😟','😤','😢','😭','😦','😧','😨','😩','🤯','😬','😰','😱','🥵','🥶','','🤪','😵','😡','😠','🤬','😷','🤒','🤕','🤢','🤮','🤧','😇','🥳','🥺','🤠','🤡','🤥','🤫','🤭','🧐','🤓','😈','👿','👹','👺','💀','👻','👽','🤖','💩','😺','😸','😹','😻','😼','😽','🙀','😿','😾'] as $emoji)
                                     <button type="button" class="text-xl p-1 hover:bg-slate-700 rounded" onclick="document.getElementById('editContent-{{ $comment->id }}').value += '{{ $emoji }}'; document.getElementById('editContent-{{ $comment->id }}').dispatchEvent(new Event('input'))">{{ $emoji }}</button>
                                 @endforeach
                             </div>
@@ -62,7 +64,7 @@
                                 <button type="button" id="emoji-btn-reply-{{ $comment->id }}" class="absolute right-2 top-2 text-xl transition-transform duration-300" onclick="const picker = document.getElementById('emoji-picker-{{ $comment->id }}'); picker.classList.toggle('hidden'); this.classList.toggle('scale-125'); this.classList.toggle('rotate-12');">😊</button>
                                 <div id="emoji-picker-{{ $comment->id }}" class="absolute right-2 top-10 z-10 bg-slate-800 border border-blue-700/30 rounded-lg p-2 mt-2 hidden shadow-xl" style="max-width: 250px; max-height: 180px; overflow-y: auto;">
                                     <div class="flex flex-wrap gap-1">
-                                    @foreach(['😀','😁','😂','🤣','😃','😄','😅','😆','😉','😊','😋','😎','😍','😘','🥰','😗','😙','😚','🙂','🤗','🤩','🤔','🤨','😐','😑','😶','🙄','😏','😣','😥','😮','🤐','😯','😪','😫','🥱','😴','😌','😛','😜','😝','🤤','😒','😓','😔','😕','🙃','🤑','😲','☹️','🙁','😖','😞','😟','😤','😢','😭','😦','😧','😨','😩','🤯','😬','😰','😱','🥵','🥶','😳','🤪','😵','😡','😠','🤬','😷','🤒','🤕','🤢','🤮','🤧','😇','🥳','🥺','🤠','🤡','🤥','🤫','🤭','🧐','🤓','😈','👿','👹','👺','💀','👻','👽','🤖','💩','😺','😸','😹','😻','😼','😽','🙀','😿','😾'] as $emoji)
+                                    @foreach(['😀','😁','😂','🤣','😃','😄','😅','😆','😉','😊','😋','😎','😍','😘','🥰','😗','😙','😚','🙂','🤗','🤩','🤔','🤨','😐','😑','😶','🙄','😏','😣','😥','😮','🤐','😯','😪','😫','🥱','😴','😌','😛','😜','😝','🤤','😒','😓','😔','😕','🙃','🤑','😲','☹️','🙁','😖','😞','😟','😤','😢','😭','😦','😧','😨','😩','🤯','😬','😰','😱','🥵','🥶','','🤪','😵','😡','😠','🤬','😷','🤒','🤕','🤢','🤮','🤧','😇','🥳','🥺','🤠','🤡','🤥','🤫','🤭','🧐','🤓','😈','👿','👹','👺','💀','👻','👽','🤖','💩','😺','😸','😹','😻','😼','😽','🙀','😿','😾'] as $emoji)
                                         <button type="button" class="text-xl p-1 hover:bg-slate-700 rounded" onclick="document.getElementById('replyContent-{{ $comment->id }}').value += '{{ $emoji }}'; document.getElementById('replyContent-{{ $comment->id }}').dispatchEvent(new Event('input'))">{{ $emoji }}</button>
                                     @endforeach
                                 </div>
@@ -96,7 +98,7 @@
                                         <button type="button" id="emoji-btn-edit-reply-{{ $reply->id }}" class="absolute right-2 top-2 text-xl transition-transform duration-300" onclick="const picker = document.getElementById('emoji-picker-edit-reply-{{ $reply->id }}'); picker.classList.toggle('hidden'); this.classList.toggle('scale-125'); this.classList.toggle('rotate-12');">😊</button>
                                         <div id="emoji-picker-edit-reply-{{ $reply->id }}" class="absolute right-2 top-10 z-10 bg-slate-800 border border-blue-700/30 rounded-lg p-2 mt-2 hidden shadow-xl" style="max-width: 250px; max-height: 180px; overflow-y: auto;">
                                             <div class="flex flex-wrap gap-1">
-                                                @foreach(['😀','😁','😂','🤣','😃','😄','😅','😆','😉','😊','😋','😎','😍','😘','🥰','😗','😙','😚','🙂','🤗','🤩','🤔','🤨','😐','😑','😶','🙄','😏','😣','😥','😮','🤐','😯','😪','😫','🥱','😴','😌','😛','😜','😝','🤤','😒','😓','😔','😕','🙃','🤑','😲','☹️','🙁','😖','😞','😟','😤','😢','😭','😦','😧','😨','😩','🤯','😬','😰','😱','🥵','🥶','😳','🤪','😵','😡','😠','🤬','😷','🤒','🤕','🤢','🤮','🤧','😇','🥳','🥺','🤠','🤡','🤥','🤫','🤭','🧐','🤓','😈','👿','👹','👺','💀','👻','👽','🤖','💩','😺','😸','😹','😻','😼','😽','🙀','😿','😾'] as $emoji)
+                                                @foreach(['😀','😁','😂','🤣','😃','😄','😅','😆','😉','😊','😋','😎','😍','😘','🥰','😗','😙','😚','🙂','🤗','🤩','🤔','🤨','😐','😑','😶','🙄','😏','😣','😥','😮','🤐','😯','😪','😫','🥱','😴','😌','😛','😜','😝','🤤','😒','😓','😔','😕','🙃','🤑','😲','☹️','🙁','😖','😞','😟','😤','😢','😭','😦','😧','😨','😩','🤯','😬','😰','😱','🥵','🥶','','🤪','😵','😡','😠','🤬','😷','🤒','🤕','🤢','🤮','🤧','😇','🥳','🥺','🤠','🤡','🤥','🤫','🤭','🧐','🤓','😈','👿','👹','👺','💀','👻','👽','🤖','💩','😺','😸','😹','😻','😼','😽','🙀','😿','😾'] as $emoji)
                                                     <button type="button" class="text-xl p-1 hover:bg-slate-700 rounded" onclick="document.getElementById('editingReplyContent-{{ $reply->id }}').value += '{{ $emoji }}'; document.getElementById('editingReplyContent-{{ $reply->id }}').dispatchEvent(new Event('input'))">{{ $emoji }}</button>
                                                 @endforeach
                                             </div>

@@ -15,12 +15,12 @@
     @livewireStyles
 </head>
 <body class="antialiased">
-    <div class="flex bg-gradient-to-br from-slate-900 via-slate-800 to-black pb-32">
+    <div class="flex pb-32 bg-gradient-to-br from-slate-900 via-slate-800 to-black">
         <!-- Sidebar -->
         <livewire:layout.sidebar />
 
         <!-- Main Content -->
-        <main class="flex-1 overflow-y-auto mb-8">
+        <main class="flex-1 mb-8 overflow-y-auto border shadow-2xl backdrop-blur-xl rounded-2xl border-blue-700/20" style="scrollbar-width: thin; scrollbar-color: rgba(168, 85, 247, 0.5) transparent;">
             @livewire('feed', ['album' => request('album')])
         </main>
     </div>
