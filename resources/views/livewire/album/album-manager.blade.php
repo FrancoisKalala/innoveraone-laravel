@@ -10,6 +10,7 @@
                             </div>
                         @endif
 
+                      
                         <!-- Header with Tabs -->
                         <div class="mb-8">
                             <div class="flex items-center justify-between mb-6">
@@ -96,11 +97,12 @@
                         </div>
 
                         <!-- My Albums Tab Content -->
-                        <div x-show="activeTab === 'my-albums'">
+                    <div x-show="activeTab === 'my-albums'">
                         @if ($albums->count() > 0)
                             <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                                 @foreach ($albums as $album)
-                                    <div class="overflow-hidden transition border bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-2xl border-blue-700/20 hover:border-blue-700/40">
+                                    <div class="relative overflow-hidden transition border bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-2xl border-blue-700/20 hover:border-blue-700/40">
+                                        {{-- Favorite button removed as requested --}}
                                         <div class="flex items-start gap-4 p-6">
                                             <div class="flex items-center justify-center w-12 h-12 text-xl text-white rounded-xl bg-gradient-to-br from-blue-600 to-black">
                                                 🖼️
@@ -116,18 +118,45 @@
                                                     @if ($album->category)
                                                         <span class="px-2 py-0.5 text-xs rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-200">{{ $album->category }}</span>
                                                     @endif
+                                                    @php
+                                                        $unviewed = $unviewedCounts[$album->id] ?? 0;
+                                                        $viewed = $viewedCounts[$album->id] ?? 0;
+                                                    @endphp
+                                                    @if($unviewed > 0)
+                                                        <span class="px-2 py-0.5 text-xs font-semibold rounded-lg bg-pink-500/20 border border-pink-500/40 text-pink-400 animate-pulse">
+                                                            {{ $unviewed }} new
+                                                        </span>
+                                                    @endif
+                                                    @if($viewed > 0)
+                                                        <span class="px-2 py-0.5 text-xs font-semibold rounded-lg bg-blue-500/20 border border-blue-500/40 text-blue-400 ml-1">
+                                                            {{ $viewed }} viewed
+                                                        </span>
+                                                    @endif
                                                 </div>
                                                 <p class="text-sm text-gray-300 line-clamp-2">{{ $album->description }}</p>
                                             </div>
                                         </div>
-                                        <div class="flex items-center gap-4 px-6 pb-6 text-sm text-gray-300">
-                                            <span class="px-2 py-1 border rounded-lg bg-white/5 border-blue-700/20">📝 {{ $album->posts_count }} Posts</span>
-                                            <span class="px-2 py-1 border rounded-lg bg-white/5 border-blue-700/20">👁️ {{ $album->views_count }} Views</span>
-                                            <span class="px-2 py-1 border rounded-lg bg-white/5 border-blue-700/20">⭐ {{ $album->favorites_count }} Favorites</span>
+                                        <div class="flex items-center gap-6 px-6 pb-6 text-sm text-gray-300">
+                                            <span class="font-semibold">📝 {{ $album->posts_count }} Posts</span>
+                                            <span class="font-semibold">👁️ {{ $album->views_count }} Views</span>
                                         </div>
-                                        <div class="flex gap-3 px-6 pb-6">
-                                            <a href="{{ route('album.posts', $album->id) }}" class="px-3 py-2 text-sm text-gray-200 rounded-lg bg-slate-700/50 hover:bg-slate-700" title="View posts in album">View Posts</a>
-                                            <button type="button" wire:click="startEdit({{ $album->id }})" class="px-3 py-2 text-sm text-gray-200 rounded-lg bg-slate-700/50 hover:bg-slate-700">Edit</button>
+                                        <div class="flex gap-4 px-6 pb-6">
+                                            <a href="{{ route('album.posts', $album->id) }}" class="flex items-center gap-2 px-4 py-2 font-semibold text-white transition rounded-full shadow-lg bg-gradient-to-r from-blue-700 to-purple-700 hover:from-blue-800 hover:to-purple-800" title="View posts in album">
+                                                View Posts
+                                                @php
+                                                    $unviewed = $unviewedCounts[$album->id] ?? 0;
+                                                    $viewed = $viewedCounts[$album->id] ?? 0;
+                                                @endphp
+                                                @if($unviewed > 0)
+                                                    <span class="px-2 py-0.5 text-xs font-semibold rounded-lg bg-pink-500/20 border border-pink-500/40 text-pink-400 animate-pulse">{{ $unviewed }} new</span>
+                                                @endif
+                                                @if($viewed > 0)
+                                                    <span class="px-2 py-0.5 text-xs font-semibold rounded-lg bg-blue-500/20 border border-blue-500/40 text-blue-400 ml-1">{{ $viewed }} viewed</span>
+                                                @endif
+                                            </a>
+                                            <button type="button" wire:click="startEdit({{ $album->id }})" class="px-4 py-2 font-semibold text-white transition rounded-full shadow-lg bg-gradient-to-r from-blue-600 to-black hover:from-blue-800 hover:to-black">
+                                                Edit
+                                            </button>
                                         </div>
                                     </div>
                                 @endforeach
@@ -227,20 +256,92 @@
                 </div>
                 <!-- Favorites Tab Content -->
                 <div x-show="activeTab === 'favorites'">
-                    <div class="py-12 text-center">
-                        <svg class="w-16 h-16 mx-auto mb-4 text-gray-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                        <p class="text-lg font-semibold text-gray-400">No favorite albums</p>
-                        <p class="mt-2 text-sm text-gray-500">Your favorite albums will appear here</p>
-                    </div>
+                    @if($favoriteAlbums->count() > 0)
+                        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                            @foreach ($favoriteAlbums as $album)
+                                <div class="relative overflow-hidden transition border bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-2xl border-blue-700/20 hover:border-blue-700/40">
+                                    <div class="flex items-start gap-4 p-6">
+                                        <div class="flex items-center justify-center w-12 h-12 text-xl text-white rounded-xl bg-gradient-to-br from-blue-600 to-black">
+                                            🖼️
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <h3 class="font-bold text-white truncate">{{ $album->title }}</h3>
+                                                @if ($album->visibility === 'public')
+                                                    <span class="px-2 py-0.5 text-xs rounded-lg bg-green-500/10 border border-green-500/30 text-green-200">Public</span>
+                                                @else
+                                                    <span class="px-2 py-0.5 text-xs rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-200">Private</span>
+                                                @endif
+                                                @if ($album->category)
+                                                    <span class="px-2 py-0.5 text-xs rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-200">{{ $album->category }}</span>
+                                                @endif
+                                            </div>
+                                            <p class="text-sm text-gray-300 line-clamp-2">{{ $album->description }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-6 px-6 pb-6 text-sm text-gray-300">
+                                        <span class="font-semibold">📝 {{ $album->posts_count }} Posts</span>
+                                        <span class="font-semibold">👁️ {{ $album->views_count }} Views</span>
+                                    </div>
+                                    <div class="flex gap-4 px-6 pb-6">
+                                        <a href="{{ route('album.posts', $album->id) }}" class="px-4 py-2 font-semibold text-white transition rounded-full shadow-lg bg-gradient-to-r from-blue-700 to-purple-700 hover:from-blue-800 hover:to-purple-800" title="View posts in album">
+                                            View Posts
+                                        </a>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="py-12 text-center">
+                            <svg class="w-16 h-16 mx-auto mb-4 text-gray-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                            <p class="text-lg font-semibold text-gray-400">No favorite albums</p>
+                            <p class="mt-2 text-sm text-gray-500">Your favorite albums will appear here</p>
+                        </div>
+                    @endif
                 </div>
 
-                <!-- Recently Viewed Tab Content -->
+                  <!-- Recently Viewed Albums Tab Content -->
                 <div x-show="activeTab === 'recent'">
-                    <div class="py-12 text-center">
-                        <svg class="w-16 h-16 mx-auto mb-4 text-gray-600" fill="currentColor" viewBox="0 0 24 24"><path d="M13 3a9 9 0 00-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0013 21a9 9 0 000-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
-                        <p class="text-lg font-semibold text-gray-400">No recently viewed albums</p>
-                        <p class="mt-2 text-sm text-gray-500">Albums you view will appear here</p>
-                    </div>
+                    @if(count($recentlyViewedAlbums) > 0)
+                        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                            @foreach($recentlyViewedAlbums as $album)
+                                <div class="relative overflow-hidden transition border bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-2xl border-blue-700/20 hover:border-blue-700/40">
+                                    <div class="flex items-start gap-4 p-6">
+                                        <div class="flex items-center justify-center w-12 h-12 text-xl text-white rounded-xl bg-gradient-to-br from-blue-600 to-black">
+                                            🖼️
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <h3 class="font-bold text-white truncate">{{ $album->title }}</h3>
+                                                @if ($album->visibility === 'public')
+                                                    <span class="px-2 py-0.5 text-xs rounded-lg bg-green-500/10 border border-green-500/30 text-green-200">Public</span>
+                                                @else
+                                                    <span class="px-2 py-0.5 text-xs rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-200">Private</span>
+                                                @endif
+                                                @if ($album->category)
+                                                    <span class="px-2 py-0.5 text-xs rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-200">{{ $album->category }}</span>
+                                                @endif
+                                            </div>
+                                            <p class="text-sm text-gray-300 line-clamp-2">{{ $album->description }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-6 px-6 pb-6 text-sm text-gray-300">
+                                        
+                                        <span class="px-2 py-0.5 text-xs font-semibold rounded-lg bg-blue-500/20 border border-blue-500/40 text-blue-400 ml-1">
+                                            Viewed {{ \Carbon\Carbon::parse($album->last_viewed)->diffForHumans() }}
+                                        </span>
+                                    </div>
+                                    <div class="flex gap-4 px-6 pb-6">
+                                        <a href="{{ route('album.posts', $album->id) }}" class="flex items-center gap-2 px-4 py-2 font-semibold text-white transition rounded-full shadow-lg bg-gradient-to-r from-blue-700 to-purple-700 hover:from-blue-800 hover:to-purple-800" title="View posts in album">
+                                            View Posts
+                                        </a>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="py-12 text-center text-gray-400">No recently viewed albums yet.</div>
+                    @endif
                 </div>
             </div>
         </main>

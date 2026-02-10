@@ -10,7 +10,10 @@ use App\Enums\AlbumCategory;
 
 class AlbumManager extends Component
 {
+    public $favoriteAlbums = [];
+    public $unviewedCounts = [];
     public $albums;
+    public $recentlyViewedAlbums = [];
     public $showCreateModal = false;
     public $isEditing = false;
     public $editingId = null;
@@ -28,6 +31,8 @@ class AlbumManager extends Component
     {
         $this->recentSearches = session()->get($this->recentSearchSessionKey(), []);
         $this->loadAlbums();
+        $this->loadFavoriteAlbums();
+        $this->loadRecentlyViewedAlbums();
         // If arriving with an edit query param, open the edit modal
         if (request()->has('edit')) {
             $editId = (int) request()->query('edit');
@@ -39,6 +44,41 @@ class AlbumManager extends Component
         if (request()->has('create')) {
             $this->openCreateModal();
         }
+    }
+
+    public function loadRecentlyViewedAlbums(): void
+    {
+        $userId = Auth::id();
+        $albumViews = \DB::table('album_post_views')
+            ->select('album_id', \DB::raw('MAX(viewed_at) as last_viewed'))
+            ->where('user_id', $userId)
+            ->groupBy('album_id')
+            ->orderByDesc('last_viewed')
+            ->limit(10)
+            ->get();
+        $albumIds = $albumViews->pluck('album_id');
+        $albums = Album::whereIn('id', $albumIds)->get()->keyBy('id');
+        $this->recentlyViewedAlbums = $albumViews->map(function($view) use ($albums) {
+            $album = $albums[$view->album_id] ?? null;
+            if ($album) {
+                $album->last_viewed = $view->last_viewed;
+                return $album;
+            }
+            return null;
+        })->filter()->values();
+    }
+
+    public function loadFavoriteAlbums(): void
+    {
+        $userId = Auth::id();
+        $this->favoriteAlbums = Album::withCount(['posts', 'views', 'favorites'])
+            ->whereIn('id', function($query) use ($userId) {
+                $query->select('album_id')
+                    ->from('album_favorites')
+                    ->where('user_id', $userId);
+            })
+            ->orderByDesc('created_at')
+            ->get();
     }
 
     public function updatedSearchQuery()
@@ -90,6 +130,18 @@ class AlbumManager extends Component
             ->where('user_id', $userId)
             ->orderByDesc('created_at')
             ->get();
+
+        // Calculate unviewed posts count for each album
+        $this->unviewedCounts = [];
+        foreach ($this->albums as $album) {
+            $postIds = $album->posts->pluck('id');
+            $viewedPostIds = \DB::table('album_post_views')
+                ->where('album_id', $album->id)
+                ->where('user_id', $userId)
+                ->pluck('post_id');
+            $unviewed = $postIds->diff($viewedPostIds)->count();
+            $this->unviewedCounts[$album->id] = $unviewed;
+        }
     }
 
     public function openCreateModal()
@@ -199,6 +251,8 @@ class AlbumManager extends Component
     {
         return view('livewire.album.album-manager', [
             'categoryOptions' => AlbumCategory::options(),
+            'favoriteAlbums' => $this->favoriteAlbums,
+            'recentlyViewedAlbums' => $this->recentlyViewedAlbums,
         ]);
     }
 }

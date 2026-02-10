@@ -45,6 +45,13 @@ class User extends Authenticatable
         return $this->hasMany(Album::class);
     }
 
+
+    // Album post views
+    public function albumPostViews()
+    {
+        return $this->hasMany(AlbumPostView::class);
+    }
+
     // Legacy method for backward compatibility
     public function chapters()
     {

@@ -5,7 +5,7 @@ use App\Models\Post;
 use App\Http\Controllers\TagSearchController;
 use App\Livewire\Album\AlbumManager;
 use App\Livewire\Album\AlbumPost;
-use App\Http\Livewire\Contact\ContactUser;
+use App\Livewire\Contact\ContactUser;
 use App\Livewire\Profile\FollowerUser;
 use App\Livewire\Contact\ContactsManager;
 use App\Livewire\Explore;
@@ -13,6 +13,7 @@ use App\Livewire\Feed;
 use App\Livewire\Group\GroupDetail;
 use App\Livewire\Message\ChatDetail;
 use App\Livewire\Post\ExpiredPosts;
+use App\Livewire\Post\ScheduledPosts;
 use App\Livewire\Profile\FollowersManager;
 use App\Livewire\User\UserPosts;
 use App\Livewire\Profile\UserProfile;
@@ -53,6 +54,7 @@ Route::get('/user/{user}/posts', UserPosts::class)
     ->name('user.posts');
 
 Route::get('/album/{album}/posts', AlbumPost::class)->name('album.posts');
+Route::get('/album/{album}/view', AlbumPost::class)->name('album.view');
 
 use App\Livewire\Album\UserAlbums;
 Route::get('/user/{user}/albums', UserAlbums::class)->middleware(['auth'])->name('user.albums');
@@ -70,6 +72,11 @@ Route::get('/albums', AlbumManager::class)
 Route::get('/explore', Explore::class)
     ->middleware(['auth'])
     ->name('explore');
+
+
+Route::get('/scheduled-posts', ScheduledPosts::class)
+    ->middleware(['auth'])
+    ->name('scheduled-posts');
 
 Route::get('/expired-posts', ExpiredPosts::class)
     ->middleware(['auth'])

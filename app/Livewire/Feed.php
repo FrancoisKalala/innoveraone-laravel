@@ -243,8 +243,13 @@ class Feed extends Component
             $contactIds = auth()->user()->contacts()->pluck('users.id');
             $query->whereIn('user_id', $contactIds);
         } elseif ($this->filterType === 'following') {
-            $followingIds = Follower::where('follower_id', $userId)->pluck('following_id');
-            $query->whereIn('user_id', $followingIds);
+            // Use the same logic as FollowersManager: get following() relation, then get the user IDs via following relation
+            $followingRelations = auth()->user()->following()->with('following')->get();
+            $followingUserIds = $followingRelations->map(function($rel) {
+                return optional($rel->following)->id;
+            })->filter()->unique()->values()->all();
+            // Do NOT include the current user's own posts in the Following tab
+            $query->whereIn('user_id', $followingUserIds);
         } elseif ($this->filterType === 'albums') {
             $albumIds = auth()->user()->albums()->pluck('id');
             $query->whereIn('album_id', $albumIds);

@@ -38,11 +38,25 @@
                             @else
                                 <span class="px-2 py-0.5 text-xs rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-200">Private</span>
                             @endif
+                                @php
+                                    $unviewed = $unviewedCounts[$album->id] ?? 0;
+                                    $viewed = $viewedCounts[$album->id] ?? 0;
+                                @endphp
+                            @if($unviewed > 0)
+                                <span class="px-2 py-0.5 text-xs font-semibold rounded-lg bg-pink-500/20 border border-pink-500/40 text-pink-400 animate-pulse">
+                                    {{ $unviewed }} new
+                                </span>
+                            @endif
+                            @if($viewed > 0)
+                                <span class="px-2 py-0.5 text-xs font-semibold rounded-lg bg-blue-500/20 border border-blue-500/40 text-blue-400 ml-1">
+                                    {{ $viewed }} viewed
+                                </span>
+                            @endif
                         </div>
                         <p class="mb-3 text-sm text-gray-400">{{ Str::limit($album->description ?? 'No description', 80) }}</p>
                         <div class="flex items-center gap-3 text-sm text-gray-300">
                             <span class="px-2 py-1 border rounded-lg bg-blue-500/10 border-blue-500/20">📝 {{ $album->posts_count }} Posts</span>
-                            <span class="px-2 py-1 border rounded-lg bg-blue-500/10 border-blue-500/20">👁️ Views</span>
+                            <span class="px-2 py-1 border rounded-lg bg-blue-500/10 border-blue-500/20">👁️ {{ $album->views_count }} Views</span>
                         </div>
                     </div>
                 </a>

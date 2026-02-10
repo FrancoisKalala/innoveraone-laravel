@@ -123,4 +123,10 @@ class Post extends Model
     {
         return in_array($this->interaction_type, ['comment', 'like_comment', 'dislike_comment', 'all']);
     }
+
+        // Album post views
+    public function albumViews()
+    {
+        return $this->hasMany(AlbumPostView::class, 'post_id');
+    }
 }

@@ -9,10 +9,11 @@
                     Back
                 </button>
             </div>
+            @livewire('album.favorite-button', ['albumId' => $album->id, 'userId' => $album->user->id], key('favorite-'.$album->id))
             <div class="flex flex-col items-center px-6 py-8 overflow-hidden border shadow-xl bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border-blue-500/20">
                 <div class="flex items-center gap-4 mb-4">
                     <div class="flex items-center justify-center rounded-full shadow-lg w-14 h-14 bg-gradient-to-br from-blue-700 to-black">
-                        <a href="{{ route('user.profile', $album->user->id) }}" class="flex items-center justify-center rounded-full shadow-lg w-14 h-14 bg-gradient-to-br from-blue-700 to-black hover:scale-105 transition">
+                        <a href="{{ route('user.profile', $album->user->id) }}" class="flex items-center justify-center transition rounded-full shadow-lg w-14 h-14 bg-gradient-to-br from-blue-700 to-black hover:scale-105">
                             <span class="text-3xl font-bold text-white">{{ substr($album->user->name, 0, 1) }}</span>
                         </a>
                     </div>
@@ -41,16 +42,26 @@
                 },
                 { threshold: 0.1 }
             );
-            $watch('$wire.offset', () => {
+            $watch('$wire.perPage', () => {
                 setTimeout(() => {
                     const sentinel = document.getElementById('infinite-scroll-sentinel');
                     if (sentinel) observer.observe(sentinel);
                 }, 100);
             });
         " class="mb-8">
+
+
             @forelse($posts as $post)
-                <div class="mb-8 animate-fade-in">
-                    @livewire('post.post-card', ['post' => $post, 'user' => $post->user, 'files' => $post->files ?? collect([])], key($post->id))
+                @php
+                    $isUnviewed = !isset($viewedPostIds) || (isset($viewedPostIds) && !$viewedPostIds->contains($post->id));
+                @endphp
+                <div class="mb-8 animate-fade-in{{ $isUnviewed ? ' unviewed' : '' }}" id="post-{{ $post->id }}">
+                    @livewire('post.post-card', [
+                        'post' => $post,
+                        'user' => $post->user,
+                        'files' => $post->files ?? collect([]),
+                        'viewed' => !$isUnviewed
+                    ], key('post-'.$post->id))
                 </div>
             @empty
                 <div class="py-20 text-center">
